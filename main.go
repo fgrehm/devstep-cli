@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/fgrehm/go-dockerpty"
 	"github.com/fsouza/go-dockerclient"
 	"os"
 )
@@ -14,11 +15,10 @@ func main() {
 	container, err := client.CreateContainer(docker.CreateContainerOptions{
 		Name: "testing-new-devstep-cli",
 		Config: &docker.Config{
-			//Image:        "ubuntu:14.04",
-			//Cmd:          []string{"/bin/bash"},
 			Image:        "fgrehm/devstep:v0.0.1",
 			Cmd:          []string{"/.devstep/bin/hack"},
 			OpenStdin:    true,
+			StdinOnce:    true,
 			AttachStdin:  true,
 			AttachStdout: true,
 			AttachStderr: true,
@@ -31,6 +31,13 @@ func main() {
 		os.Exit(1)
 	}
 
+	defer func() {
+		client.RemoveContainer(docker.RemoveContainerOptions{
+			ID: container.ID,
+			Force: true,
+		})
+	}()
+
 	// Start container
 	pwd, err := os.Getwd()
 	if err != nil {
@@ -42,26 +49,8 @@ func main() {
 		pwd + ":/workspace",
 		"/tmp/devstep/cache:/.devstep/cache",
 	}
-	err = client.StartContainer(container.ID, &docker.HostConfig{
+	err = dockerpty.Start(client, container, &docker.HostConfig{
 		Binds: binds,
-	})
-
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	// Attach to the container
-	err = client.AttachToContainer(docker.AttachToContainerOptions{
-		Container:    container.ID,
-		InputStream:  os.Stdin,
-		OutputStream: os.Stdout,
-		ErrorStream:  os.Stderr,
-		Stdin:        true,
-		Stdout:       true,
-		Stderr:       true,
-		Stream:       true,
-		RawTerminal:  true,
 	})
 
 	if err != nil {
