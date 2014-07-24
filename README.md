@@ -4,11 +4,8 @@ Work in progress rewrite of the [devstep](http://fgrehm.viewdocs.io/devstep) CLI
 
 ## TODO
 
-* [x] `devstep hack`
-* [ ] `devstep build`
-* [ ] `devstep hack` on top of a previously built image
-* [ ] `devstep bootstrap`
-* [ ] Custom `docker run` options for `devstep hack`
-* [ ] User and project specific configs for the `devstep` commands (current `.devsteprc`)
-* [ ] `devstep clean`
-* [ ] Figure out why we need to hit enter after exiting a docker attach
+* [x] Spike on `devstep hack`
+* [x] Spike on `devstep build`
+* [ ] Spike on `devstep hack` on top of a previously built image
+* [ ] Spike on `devstep bootstrap`
+* [ ] Write a proper CLI using the spike as a reference
