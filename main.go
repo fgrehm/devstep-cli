@@ -58,25 +58,22 @@ func runBuild(client *docker.Client, container *docker.Container) (err error) {
 	// 	os.Exit(1)
 	// }
 
-	exitedChannel := make(chan struct{})
-
-	// This goroutine will listen to Docker events and will signal that is has
-	// stopped at the exitedChannel
-	go listenForContainerExit(client, container.ID, exitedChannel)
-
-	// Attach to the container on a separate goroutine
-	go attachToContainer(client, container.ID)
-
 	binds := []string{
 		"/home/fabio/projects/oss/devstep-cli:/workspace",
 		"/tmp/devstep/cache:/.devstep/cache",
 	}
 
+	// Keep an eye on the build...
 	err = client.StartContainer(container.ID, &docker.HostConfig{
 		Binds: binds,
 	})
 
-	<-exitedChannel
+	if err != nil {
+		return err
+	}
+
+	// Keep an eye on the build...
+	attachToContainer(client, container.ID)
 
 	// TODO: Check for exit status
 
