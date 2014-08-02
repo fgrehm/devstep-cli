@@ -1,21 +1,39 @@
 package main
 
 import (
+	"fmt"
 	"github.com/codegangsta/cli"
 	"github.com/fgrehm/devstep-cli/devstep"
 	"os"
 )
 
-var project devstep.Project
+var (
+	project devstep.Project
+	client  devstep.DockerClient
+)
 
 var commands = []cli.Command{
 	buildCmd,
 	hackCmd,
 }
 
+func projectRoot() string {
+	pwd, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	return pwd
+}
+
+func homeDir() string {
+	return os.Getenv("HOME")
+}
+
 func main() {
-	// TODO: Error handling
-	project, _ = devstep.NewProject()
+	client = devstep.NewClient("unix:///var/run/docker.sock")
+	loader := devstep.NewConfigLoader(client, homeDir(), projectRoot())
+	project, _ = devstep.NewProject(loader.Load())
 
 	app := cli.NewApp()
 	app.Name = "devstep"
@@ -35,7 +53,7 @@ var buildCmd = cli.Command{
 	Name:  "build",
 	Usage: "build a docker image for the current project",
 	Action: func(c *cli.Context) {
-		project.Build()
+		project.Build(client)
 	},
 }
 
@@ -43,6 +61,6 @@ var hackCmd = cli.Command{
 	Name:  "hack",
 	Usage: "start a hacking session for the current project",
 	Action: func(c *cli.Context) {
-		project.Hack()
+		project.Hack(client)
 	},
 }
