@@ -16,6 +16,7 @@ type DockerClient interface {
 type DockerRunOpts struct {
 	AutoRemove bool
 	Pty        bool
+	Workdir    string
 	Env        map[string]string
 	Volumes    []string
 	Links      []string

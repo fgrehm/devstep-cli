@@ -24,8 +24,10 @@ func Test_Hack(t *testing.T) {
 	err = project.Hack(clientMock)
 	ok(t, err)
 
+	equals(t, "repo/name:tag", runOpts.Image)
 	assert(t, runOpts.AutoRemove, "AutoRemove is false")
 	assert(t, runOpts.Pty, "Pseudo tty allocation is disabled")
-	equals(t, []string{"/.devstep/bin/hack", "/path/on/guest"}, runOpts.Cmd)
+	equals(t, []string{"/.devstep/bin/hack"}, runOpts.Cmd)
 	equals(t, []string{"/path/on/host:/path/on/guest"}, runOpts.Volumes)
+	equals(t, "/path/on/guest", runOpts.Workdir)
 }
