@@ -52,6 +52,11 @@ func (p *project) Build(client DockerClient) error {
 
 // Starts a hacking session on the project
 func (p *project) Hack(client DockerClient) error {
-	println("Will hack")
+	client.Run(&DockerRunOpts{
+		AutoRemove: true,
+		Pty:        true,
+		Cmd:        []string{"/.devstep/bin/hack", p.guestDir},
+		Volumes:    []string{p.hostDir + ":" + p.guestDir},
+	})
 	return nil
 }
