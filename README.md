@@ -4,8 +4,8 @@ Work in progress rewrite of the [devstep](http://fgrehm.viewdocs.io/devstep) CLI
 
 ## TODO
 
-* [x] Spike on `devstep hack`
-* [x] Spike on `devstep build`
-* [ ] Spike on `devstep hack` on top of a previously built image
-* [ ] Spike on `devstep bootstrap`
-* [ ] Write a proper CLI using the spike as a reference
+* [x] Scaffold basic integration with codegangsta/cli
+* [ ] Project interface
+* [ ] Prototype `devstep hack`
+* [ ] Unit Tests
+* [ ] Prototype `devstep build`
