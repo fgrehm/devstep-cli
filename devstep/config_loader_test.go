@@ -14,6 +14,7 @@ func Test_Defaults(t *testing.T) {
 
 	equals(t, "fgrehm/devstep:v0.1.0", config.BaseImage)
 	equals(t, projectRoot, config.HostDir)
+	equals(t, "/workspace", config.GuestDir)
 	equals(t, "/tmp/devstep/cache", config.CacheDir)
 	equals(t, "", config.RepositoryName)
 }

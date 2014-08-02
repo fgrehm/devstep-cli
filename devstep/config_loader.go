@@ -14,6 +14,7 @@ func (l *configLoader) Load() *ProjectConfig {
 	return &ProjectConfig{
 		BaseImage: "fgrehm/devstep:v0.1.0",
 		HostDir:   l.projectRoot,
+		GuestDir:  "/workspace",
 		CacheDir:  "/tmp/devstep/cache",
 	}
 }
