@@ -39,7 +39,7 @@ func main() {
 	app.Name = "devstep"
 	app.Author = "Fábio Rehm"
 	app.Email = "fgrehm@gmail.com"
-	app.Usage = "build development environments with ease"
+	app.Usage = "development environments made easy"
 	app.Version = "0.1.0"
 	app.Flags = []cli.Flag{
 		cli.BoolFlag{Name: "debug, d", Usage: "debug mode"},

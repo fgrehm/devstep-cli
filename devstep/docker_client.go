@@ -41,42 +41,67 @@ type dockerClient struct {
 }
 
 func (c *dockerClient) Run(opts *DockerRunOpts) (*DockerRunResult, error) {
-	fmt.Println(opts)
+	// fmt.Println(opts)
 
 	container, err := c.client.CreateContainer(docker.CreateContainerOptions{
 		Name: "testing-new-devstep-cli",
 		Config: &docker.Config{
 			Image:        opts.Image,
 			Cmd:          opts.Cmd,
-			OpenStdin:    true,
-			StdinOnce:    true,
-			AttachStdin:  true,
+			OpenStdin:    opts.Pty,
+			StdinOnce:    opts.Pty,
+			AttachStdin:  opts.Pty,
 			AttachStdout: true,
 			AttachStderr: true,
-			Tty:          true,
+			Tty:          opts.Pty,
 			WorkingDir:   opts.Workdir,
 		},
 	})
 
 	if err != nil {
-		fmt.Println("create")
+		fmt.Println("Error when creating container:")
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
 	defer func() {
 		c.client.RemoveContainer(docker.RemoveContainerOptions{
-			ID:    container.ID,
-			Force: true,
+			ID:            container.ID,
+			Force:         true,
+			RemoveVolumes: true,
 		})
 	}()
 
-	err = dockerpty.Start(c.client, container, &docker.HostConfig{
-		Binds: opts.Volumes,
-	})
+	hostConfig := &docker.HostConfig{Binds: opts.Volumes}
+
+	if opts.Pty {
+		err = dockerpty.Start(c.client, container, hostConfig)
+	} else {
+		err = c.client.StartContainer(container.ID, hostConfig)
+
+		if err == nil {
+			// Attach to the container
+			attachOpts := docker.AttachToContainerOptions{
+				Container:    container.ID,
+				OutputStream: os.Stdout,
+				ErrorStream:  os.Stderr,
+				Stdin:        opts.Pty,
+				Stdout:       true,
+				Stderr:       true,
+				Stream:       true,
+				RawTerminal:  opts.Pty,
+			}
+
+			if opts.Pty {
+				attachOpts.InputStream = os.Stdin
+			}
+
+			err = c.client.AttachToContainer(attachOpts)
+		}
+	}
 
 	if err != nil {
-		fmt.Println("start")
+		fmt.Println("Error when starting container:")
 		fmt.Println(err)
 		os.Exit(1)
 	}

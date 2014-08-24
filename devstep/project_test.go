@@ -28,6 +28,17 @@ func Test_Hack(t *testing.T) {
 	assert(t, runOpts.AutoRemove, "AutoRemove is false")
 	assert(t, runOpts.Pty, "Pseudo tty allocation is disabled")
 	equals(t, []string{"/.devstep/bin/hack"}, runOpts.Cmd)
-	equals(t, []string{"/path/on/host:/path/on/guest"}, runOpts.Volumes)
 	equals(t, "/path/on/guest", runOpts.Workdir)
+
+	assert(t, inArray("/path/on/host:/path/on/guest", runOpts.Volumes), "Project dir was not shared")
+	assert(t, inArray("/tmp/devstep/cache:/.devstep/cache", runOpts.Volumes), "Cache dir was not shared")
+}
+
+func inArray(str string, array[]string) bool {
+	for index := range array {
+		if str == array[index] {
+			return true
+		}
+	}
+	return false
 }
