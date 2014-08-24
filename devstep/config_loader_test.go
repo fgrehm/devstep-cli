@@ -16,5 +16,5 @@ func Test_Defaults(t *testing.T) {
 	equals(t, projectRoot, config.HostDir)
 	equals(t, "/workspace", config.GuestDir)
 	equals(t, "/tmp/devstep/cache", config.CacheDir)
-	equals(t, "", config.RepositoryName)
+	equals(t, "devstep/a-project-dir", config.RepositoryName)
 }

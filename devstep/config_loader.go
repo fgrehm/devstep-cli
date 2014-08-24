@@ -1,5 +1,7 @@
 package devstep
 
+import "path/filepath"
+
 type ConfigLoader interface {
 	Load() *ProjectConfig
 }
@@ -11,8 +13,11 @@ type configLoader struct {
 }
 
 func (l *configLoader) Load() *ProjectConfig {
+	repositoryName := "devstep/" + filepath.Base(l.projectRoot)
+
 	return &ProjectConfig{
 		BaseImage: "fgrehm/devstep:v0.1.0",
+		RepositoryName: repositoryName,
 		HostDir:   l.projectRoot,
 		GuestDir:  "/workspace",
 		CacheDir:  "/tmp/devstep/cache",
