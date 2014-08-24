@@ -9,6 +9,7 @@ type Project interface {
 
 // Project specific configuration, usually parsed from an yaml file
 type ProjectConfig struct {
+	SourceImage    string         // image used when starting environments from scratch
 	BaseImage      string         // starting point for the project
 	RepositoryName string         // name of the docker repository this project should be commited
 	HostDir        string         // root directory of the project on the host machine
@@ -20,6 +21,7 @@ type ProjectConfig struct {
 
 // An implementation of a Project.
 type project struct {
+	sourceImage    string
 	baseImage      string
 	repositoryName string
 	hostDir        string
@@ -33,6 +35,7 @@ type project struct {
 func NewProject(config *ProjectConfig) (Project, error) {
 	// TODO: Set defaults if not provided
 	project := &project{
+		sourceImage:    config.SourceImage,
 		baseImage:      config.BaseImage,
 		repositoryName: config.RepositoryName,
 		hostDir:        config.HostDir,

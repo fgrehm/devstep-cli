@@ -12,6 +12,7 @@ func Test_Defaults(t *testing.T) {
 
 	config := loader.Load()
 
+	equals(t, "fgrehm/devstep:v0.1.0", config.SourceImage)
 	equals(t, "fgrehm/devstep:v0.1.0", config.BaseImage)
 	equals(t, projectRoot, config.HostDir)
 	equals(t, "/workspace", config.GuestDir)
