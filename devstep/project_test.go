@@ -34,7 +34,7 @@ func Test_Hack(t *testing.T) {
 	assert(t, inArray("/tmp/devstep/cache:/.devstep/cache", runOpts.Volumes), "Cache dir was not shared")
 }
 
-func inArray(str string, array[]string) bool {
+func inArray(str string, array []string) bool {
 	for index := range array {
 		if str == array[index] {
 			return true
