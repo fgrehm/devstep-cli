@@ -33,5 +33,9 @@ func (c *MockClient) ListTags(repositoryName string) ([]string, error) {
 }
 
 func NewMockClient() *MockClient {
-	return &MockClient{}
+	return &MockClient{
+		ListTagsFunc: func(repositoryName string) ([]string, error) {
+			return []string{}, nil
+		},
+	}
 }

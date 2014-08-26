@@ -10,7 +10,9 @@ func Test_Defaults(t *testing.T) {
 	projectRoot := "/path/to/a-project-dir"
 	loader := devstep.NewConfigLoader(client, "", projectRoot)
 
-	config := loader.Load()
+	config, err := loader.Load()
+
+	ok(t, err)
 
 	equals(t, "fgrehm/devstep:v0.1.0", config.SourceImage)
 	equals(t, "fgrehm/devstep:v0.1.0", config.BaseImage)

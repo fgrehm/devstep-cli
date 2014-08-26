@@ -1,5 +1,11 @@
 package devstep
 
+import (
+	"errors"
+	"fmt"
+	"time"
+)
+
 // The project interface provides access to the configuration, state and
 // lifecycle of a Project.
 type Project interface {
@@ -21,52 +27,81 @@ type ProjectConfig struct {
 
 // An implementation of a Project.
 type project struct {
-	sourceImage    string
-	baseImage      string
-	repositoryName string
-	hostDir        string
-	guestDir       string
-	cacheDir       string
-	defaults       *DockerRunOpts
-	hackOpts       *DockerRunOpts
+	*ProjectConfig
 }
 
 // This creates a new project
 func NewProject(config *ProjectConfig) (Project, error) {
-	// TODO: Set defaults if not provided
-	project := &project{
-		sourceImage:    config.SourceImage,
-		baseImage:      config.BaseImage,
-		repositoryName: config.RepositoryName,
-		hostDir:        config.HostDir,
-		guestDir:       config.GuestDir,
-		cacheDir:       config.CacheDir,
-		defaults:       config.Defaults,
-		hackOpts:       config.HackOpts,
-	}
+	// TODO: This seems a bit weird
+	project := &project{config}
 	return project, nil
 }
 
 // Build the project and commit it to an image
 func (p *project) Build(client DockerClient) error {
-	println("Will build")
-	return nil
+	volumes := []string{
+		p.HostDir + ":" + p.GuestDir,
+		"/tmp/devstep/cache:/.devstep/cache",
+	}
+
+	fmt.Printf("==> Building project from '%s'\n", p.BaseImage)
+
+	result, err := client.Run(&DockerRunOpts{
+		Image:      p.BaseImage,
+		AutoRemove: false,
+		Pty:        true,
+		Cmd:        []string{"/.devstep/bin/build-project", "/workspace"},
+		Volumes:    volumes,
+		Workdir:    p.GuestDir,
+	})
+	log.Debug("Docker run result: %+v", result)
+
+	if result.ExitCode != 0 {
+		return errors.New("Container exited with status != 0")
+	}
+
+	tag := "latest"
+	fmt.Printf("==> Commiting container to '%s:%s'\n", p.RepositoryName, tag)
+	err = client.Commit(&DockerCommitOpts{
+		ContainerID:    result.ContainerID,
+		RepositoryName: p.RepositoryName,
+		Tag:            tag,
+	})
+	if err != nil {
+		return errors.New("Error commiting container:\n  " + err.Error())
+	}
+
+	tag = time.Now().Local().Format("20060102150405")
+	fmt.Printf("==> Commiting container to '%s:%s'\n", p.RepositoryName, tag)
+	err = client.Commit(&DockerCommitOpts{
+		ContainerID:    result.ContainerID,
+		RepositoryName: p.RepositoryName,
+		Tag:            tag,
+	})
+	if err != nil {
+		return errors.New("Error commiting container:\n  " + err.Error())
+	}
+
+	fmt.Println("==> Removing container used for build")
+	return client.RemoveContainer(result.ContainerID)
 }
 
 // Starts a hacking session on the project
 func (p *project) Hack(client DockerClient) error {
 	volumes := []string{
-		p.hostDir + ":" + p.guestDir,
+		p.HostDir + ":" + p.GuestDir,
 		"/tmp/devstep/cache:/.devstep/cache",
 	}
 
-	client.Run(&DockerRunOpts{
-		Image:      p.baseImage,
+	fmt.Printf("==> Creating container using '%s'\n", p.BaseImage)
+
+	_, err := client.Run(&DockerRunOpts{
+		Image:      p.BaseImage,
 		AutoRemove: true,
 		Pty:        true,
 		Cmd:        []string{"/.devstep/bin/hack"},
 		Volumes:    volumes,
-		Workdir:    p.guestDir,
+		Workdir:    p.GuestDir,
 	})
-	return nil
+	return err
 }

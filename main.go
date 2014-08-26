@@ -30,11 +30,16 @@ func homeDir() string {
 	return os.Getenv("HOME")
 }
 
-func main() {
+func newProject() devstep.Project {
 	client = devstep.NewClient("unix:///var/run/docker.sock")
 	loader := devstep.NewConfigLoader(client, homeDir(), projectRoot())
-	project, _ = devstep.NewProject(loader.Load())
+	// TODO: Handle errors
+	config , _ := loader.Load()
+	project, _ = devstep.NewProject(config)
+	return project
+}
 
+func main() {
 	app := cli.NewApp()
 	app.Name = "devstep"
 	app.Author = "Fábio Rehm"
@@ -53,7 +58,13 @@ var buildCmd = cli.Command{
 	Name:  "build",
 	Usage: "build a docker image for the current project",
 	Action: func(c *cli.Context) {
-		project.Build(client)
+		devstep.Verbose(c.GlobalBool("debug"))
+
+		err := newProject().Build(client)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 	},
 }
 
@@ -61,6 +72,12 @@ var hackCmd = cli.Command{
 	Name:  "hack",
 	Usage: "start a hacking session for the current project",
 	Action: func(c *cli.Context) {
-		project.Hack(client)
+		devstep.Verbose(c.GlobalBool("debug"))
+
+		err := newProject().Hack(client)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 	},
 }

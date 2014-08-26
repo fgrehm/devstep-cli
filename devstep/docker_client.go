@@ -2,10 +2,10 @@ package devstep
 
 import (
 	"errors"
-	"fmt"
 	"github.com/fgrehm/go-dockerpty"
 	"github.com/fsouza/go-dockerclient"
 	"os"
+	"strings"
 )
 
 type DockerClient interface {
@@ -28,12 +28,13 @@ type DockerRunOpts struct {
 }
 type DockerRunResult struct {
 	ContainerID string
-	ExitStatus  int8
+	ExitCode    int
 }
 
 type DockerCommitOpts struct {
-	ContainerID string
-	ImageName   string
+	ContainerID    string
+	RepositoryName string
+	Tag            string
 }
 
 type dockerClient struct {
@@ -41,10 +42,7 @@ type dockerClient struct {
 }
 
 func (c *dockerClient) Run(opts *DockerRunOpts) (*DockerRunResult, error) {
-	// fmt.Println(opts)
-
-	container, err := c.client.CreateContainer(docker.CreateContainerOptions{
-		Name: "testing-new-devstep-cli",
+	createOpts := docker.CreateContainerOptions{
 		Config: &docker.Config{
 			Image:        opts.Image,
 			Cmd:          opts.Cmd,
@@ -56,25 +54,24 @@ func (c *dockerClient) Run(opts *DockerRunOpts) (*DockerRunResult, error) {
 			Tty:          opts.Pty,
 			WorkingDir:   opts.Workdir,
 		},
-	})
-
+	}
+	log.Info("Creating container")
+	log.Debug("%+v", createOpts.Config)
+	container, err := c.client.CreateContainer(createOpts)
 	if err != nil {
-		fmt.Println("Error when creating container:")
-		fmt.Println(err)
-		os.Exit(1)
+		return nil, errors.New("Error creating container: \n  " + err.Error())
+	}
+	log.Info("Container created (ID='%s')", container.ID)
+
+	if opts.AutoRemove {
+		defer c.RemoveContainer(container.ID)
 	}
 
-	defer func() {
-		c.client.RemoveContainer(docker.RemoveContainerOptions{
-			ID:            container.ID,
-			Force:         true,
-			RemoveVolumes: true,
-		})
-	}()
-
 	hostConfig := &docker.HostConfig{Binds: opts.Volumes}
+	log.Debug("HostConfig: %+v", hostConfig)
 
 	if opts.Pty {
+		log.Info("Starting container with pseudo terminal")
 		err = dockerpty.Start(c.client, container, hostConfig)
 	} else {
 		err = c.client.StartContainer(container.ID, hostConfig)
@@ -96,33 +93,66 @@ func (c *dockerClient) Run(opts *DockerRunOpts) (*DockerRunResult, error) {
 				attachOpts.InputStream = os.Stdin
 			}
 
+			log.Info("Attaching to container '%s'", container.ID)
+			log.Debug("Attach options: %+v", attachOpts)
 			err = c.client.AttachToContainer(attachOpts)
 		}
 	}
-
 	if err != nil {
-		fmt.Println("Error when starting container:")
-		fmt.Println(err)
-		os.Exit(1)
+		return nil, errors.New("Error starting container:\n  " + err.Error())
 	}
 
-	return nil, nil
+	container, err = c.client.InspectContainer(container.ID)
+	if err != nil {
+		return nil, errors.New("Error inspecting container:\n  " + err.Error())
+	}
+
+	return &DockerRunResult{
+		ContainerID: container.ID,
+		ExitCode:  container.State.ExitCode,
+	}, nil
 }
 
-func (*dockerClient) RemoveContainer(string) error {
-	return errors.New("NotImplemented")
+func (c *dockerClient) RemoveContainer(containerID string) error {
+	log.Info("Removing container '%s'", containerID)
+	return c.client.RemoveContainer(docker.RemoveContainerOptions{
+		ID:            containerID,
+		Force:         true,
+		RemoveVolumes: true,
+	})
 }
 
-func (*dockerClient) Commit(*DockerCommitOpts) error {
-	return errors.New("NotImplemented")
+func (c *dockerClient) Commit(opts *DockerCommitOpts) error {
+	_, err := c.client.CommitContainer(docker.CommitContainerOptions{
+		Container:  opts.ContainerID,
+		Repository: opts.RepositoryName,
+		Tag:        opts.Tag,
+	})
+
+	return err
 }
 
 func (*dockerClient) RemoveImage(string) error {
 	return errors.New("NotImplemented")
 }
 
-func (*dockerClient) ListTags(string) ([]string, error) {
-	return nil, errors.New("NotImplemented")
+// List tags for a given repository
+func (c *dockerClient) ListTags(repositoryName string) ([]string, error) {
+	if repositoryName == "" {
+		return nil, errors.New("Repository name can't be blank")
+	}
+
+	apiImages, err := c.client.ListImages(false)
+	tags := []string{}
+	for _, img := range apiImages {
+		for _, repoTag := range img.RepoTags {
+			repositoryAndTag := strings.Split(repoTag, ":")
+			if repositoryAndTag[0] == repositoryName {
+				tags = append(tags, repositoryAndTag[1])
+			}
+		}
+	}
+	return tags, err
 }
 
 func NewClient(endpoint string) DockerClient {

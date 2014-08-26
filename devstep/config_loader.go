@@ -3,7 +3,7 @@ package devstep
 import "path/filepath"
 
 type ConfigLoader interface {
-	Load() *ProjectConfig
+	Load() (*ProjectConfig, error)
 }
 
 type configLoader struct {
@@ -12,10 +12,11 @@ type configLoader struct {
 	projectRoot   string
 }
 
-func (l *configLoader) Load() *ProjectConfig {
-	repositoryName := "devstep/" + filepath.Base(l.projectRoot)
+func (l *configLoader) Load() (*ProjectConfig, error) {
+	log.Info("Loading configuration for %s", l.projectRoot)
 
-	return &ProjectConfig{
+	repositoryName := "devstep/" + filepath.Base(l.projectRoot)
+	config := &ProjectConfig{
 		SourceImage:    "fgrehm/devstep:v0.1.0",
 		BaseImage:      "fgrehm/devstep:v0.1.0",
 		RepositoryName: repositoryName,
@@ -23,6 +24,20 @@ func (l *configLoader) Load() *ProjectConfig {
 		GuestDir:       "/workspace",
 		CacheDir:       "/tmp/devstep/cache",
 	}
+
+	log.Debug("Fetching tags for '%s'", repositoryName)
+	tags, err := l.client.ListTags(repositoryName)
+	if err != nil {
+		return nil, err
+	}
+	log.Debug("Tags found %s", tags)
+	if len(tags) > 0 {
+		config.BaseImage = config.RepositoryName + ":" + tags[0]
+	}
+
+	log.Info("Loaded config: %+v", config)
+
+	return config, nil
 }
 
 func NewConfigLoader(client DockerClient, homeDirectory, projectRoot string) ConfigLoader {
