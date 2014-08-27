@@ -14,6 +14,9 @@ type configLoader struct {
 
 func (l *configLoader) Load() (*ProjectConfig, error) {
 	log.Info("Loading configuration for %s", l.projectRoot)
+	// TODO: Load config from home directory
+	// TODO: Load config from project directory
+	// TODO: Handle errors
 
 	repositoryName := "devstep/" + filepath.Base(l.projectRoot)
 	config := &ProjectConfig{

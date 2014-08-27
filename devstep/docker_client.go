@@ -1,5 +1,7 @@
 package devstep
 
+// TODO: Figure out how this can be unit tested
+
 import (
 	"errors"
 	"github.com/fgrehm/go-dockerpty"
