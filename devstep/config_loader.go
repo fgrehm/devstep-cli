@@ -25,12 +25,10 @@ func (l *configLoader) Load() (*ProjectConfig, error) {
 		CacheDir:       "/tmp/devstep/cache",
 	}
 
-	log.Debug("Fetching tags for '%s'", repositoryName)
 	tags, err := l.client.ListTags(repositoryName)
 	if err != nil {
 		return nil, err
 	}
-	log.Debug("Tags found %s", tags)
 	if len(tags) > 0 {
 		config.BaseImage = config.RepositoryName + ":" + tags[0]
 	}

@@ -133,6 +133,7 @@ func (c *dockerClient) Commit(opts *DockerCommitOpts) error {
 }
 
 func (c *dockerClient) RemoveImage(name string) error {
+	log.Info("Removing image '%s'", name)
 	return c.client.RemoveImage(name)
 }
 
@@ -141,6 +142,8 @@ func (c *dockerClient) ListTags(repositoryName string) ([]string, error) {
 	if repositoryName == "" {
 		return nil, errors.New("Repository name can't be blank")
 	}
+
+	log.Debug("Fetching tags for '%s'", repositoryName)
 
 	apiImages, err := c.client.ListImages(false)
 	tags := []string{}
@@ -152,6 +155,9 @@ func (c *dockerClient) ListTags(repositoryName string) ([]string, error) {
 			}
 		}
 	}
+
+	log.Debug("Tags found %s", tags)
+
 	return tags, err
 }
 
