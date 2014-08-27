@@ -10,6 +10,7 @@ import (
 // lifecycle of a Project.
 type Project interface {
 	Build(DockerClient) error
+	Clean(DockerClient) error
 	Hack(DockerClient) error
 }
 
@@ -108,4 +109,22 @@ func (p *project) Hack(client DockerClient) error {
 		Workdir:    p.GuestDir,
 	})
 	return err
+}
+
+func (p *project) Clean(client DockerClient) error {
+	fmt.Printf("==> Removing tags for '%s'\n", p.RepositoryName)
+
+	tags, err := client.ListTags(p.RepositoryName)
+	if err != nil {
+		return err
+	}
+
+	for _, tag := range tags {
+		image := p.RepositoryName + ":" + tag
+		if err = client.RemoveImage(image); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

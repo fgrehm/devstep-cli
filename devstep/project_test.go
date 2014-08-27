@@ -149,6 +149,34 @@ func Test_BuildWithBadExitCode(t *testing.T) {
 	assert(t, err != nil, "Did not error")
 }
 
+func Test_Clean(t *testing.T) {
+	project, err := devstep.NewProject(&devstep.ProjectConfig{
+		RepositoryName: "my/project",
+	})
+	ok(t, err)
+
+	tags := []string{"a-tag", "other-tag"}
+	clientMock := NewMockClient()
+
+	var repositoryNameSearched string
+	clientMock.ListTagsFunc = func(r string) ([]string, error) {
+		repositoryNameSearched = r
+		return tags, nil
+	}
+
+	removedImages := []string{}
+	clientMock.RemoveImageFunc = func(t string) error {
+		removedImages = append(removedImages, t)
+		return nil
+	}
+
+	err = project.Clean(clientMock)
+	ok(t, err)
+
+	equals(t, "my/project", repositoryNameSearched)
+	equals(t, 2, len(removedImages))
+}
+
 func inArray(str string, array []string) bool {
 	for index := range array {
 		if str == array[index] {

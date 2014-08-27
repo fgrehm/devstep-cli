@@ -132,8 +132,8 @@ func (c *dockerClient) Commit(opts *DockerCommitOpts) error {
 	return err
 }
 
-func (*dockerClient) RemoveImage(string) error {
-	return errors.New("NotImplemented")
+func (c *dockerClient) RemoveImage(name string) error {
+	return c.client.RemoveImage(name)
 }
 
 // List tags for a given repository

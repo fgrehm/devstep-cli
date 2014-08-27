@@ -27,13 +27,16 @@ func Test_SourceImageGetsSetWhenRepositoryTagExists(t *testing.T) {
 	client := NewMockClient()
 	loader := devstep.NewConfigLoader(client, "", "/path/to/a-project")
 
-	client.ListTagsFunc = func(repositoryName string) ([]string, error) {
+	var repositoryNameSearched string
+	client.ListTagsFunc = func(r string) ([]string, error) {
+		repositoryNameSearched = r
 		return []string{"a-tag", "other-tag"}, nil
 	}
 
 	config, err := loader.Load()
 
 	ok(t, err)
+	equals(t, "devstep/a-project", repositoryNameSearched)
 	equals(t, "devstep/a-project:a-tag", config.BaseImage)
 }
 

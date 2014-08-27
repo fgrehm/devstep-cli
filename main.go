@@ -15,6 +15,7 @@ var (
 var commands = []cli.Command{
 	buildCmd,
 	hackCmd,
+	cleanCmd,
 }
 
 func projectRoot() string {
@@ -75,6 +76,20 @@ var hackCmd = cli.Command{
 		devstep.Verbose(c.GlobalBool("debug"))
 
 		err := newProject().Hack(client)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
+var cleanCmd = cli.Command{
+	Name:  "clean",
+	Usage: "remove previously built images for the current environment",
+	Action: func(c *cli.Context) {
+		devstep.Verbose(c.GlobalBool("debug"))
+
+		err := newProject().Clean(client)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
