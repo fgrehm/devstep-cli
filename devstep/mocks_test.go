@@ -37,5 +37,14 @@ func NewMockClient() *MockClient {
 		ListTagsFunc: func(repositoryName string) ([]string, error) {
 			return []string{}, nil
 		},
+		RunFunc: func(runOpts *devstep.DockerRunOpts) (*devstep.DockerRunResult, error) {
+			return &devstep.DockerRunResult{}, nil
+		},
+		CommitFunc: func(commitOpts *devstep.DockerCommitOpts) error {
+			return nil
+		},
+		RemoveContainerFunc: func(containerID string) error {
+			return nil
+		},
 	}
 }

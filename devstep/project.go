@@ -50,11 +50,15 @@ func (p *project) Build(client DockerClient) error {
 		Image:      p.BaseImage,
 		AutoRemove: false,
 		Pty:        true,
-		Cmd:        []string{"/.devstep/bin/build-project", "/workspace"},
+		Cmd:        []string{"/.devstep/bin/build-project", p.GuestDir},
 		Volumes:    volumes,
 		Workdir:    p.GuestDir,
 	})
 	log.Debug("Docker run result: %+v", result)
+
+	if err != nil{
+		return err
+	}
 
 	if result.ExitCode != 0 {
 		return errors.New("Container exited with status != 0")
