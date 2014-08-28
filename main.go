@@ -16,6 +16,7 @@ var commands = []cli.Command{
 	buildCmd,
 	hackCmd,
 	cleanCmd,
+	infoCmd,
 }
 
 func projectRoot() string {
@@ -31,11 +32,21 @@ func homeDir() string {
 	return os.Getenv("HOME")
 }
 
-func newProject() devstep.Project {
+func loadConfig() *devstep.ProjectConfig {
 	client = devstep.NewClient("unix:///var/run/docker.sock")
 	loader := devstep.NewConfigLoader(client, homeDir(), projectRoot())
-	// TODO: Handle errors
-	config, _ := loader.Load()
+
+	config, err := loader.Load()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	return config
+}
+
+func newProject() devstep.Project {
+	config := loadConfig()
 	project, _ = devstep.NewProject(config)
 	return project
 }
@@ -93,6 +104,22 @@ var cleanCmd = cli.Command{
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
+		}
+	},
+}
+
+var infoCmd = cli.Command{
+	Name:  "info",
+	Usage: "show information about the current environment",
+	Action: func(c *cli.Context) {
+		devstep.Verbose(c.GlobalBool("debug"))
+		config := loadConfig()
+		fmt.Printf("%+v\n", config)
+		if config.Defaults != nil {
+			fmt.Printf("%+v\n", config.Defaults)
+		}
+		if config.HackOpts != nil {
+			fmt.Printf("%+v\n", config.HackOpts)
 		}
 	},
 }
