@@ -24,6 +24,25 @@ func Test_Defaults(t *testing.T) {
 	equals(t, "devstep/a-project-dir", config.RepositoryName)
 }
 
+func Test_DefaultsWithBlankValuesOnYaml(t *testing.T) {
+	tempDir, _ := ioutil.TempDir("", "devstep-project-")
+	writeFile(tempDir+"/devstep.yml", "")
+	defer os.RemoveAll(tempDir)
+
+	projectRoot := "/path/to/a-project-dir"
+	loader, _ := newConfigLoader(tempDir, projectRoot)
+	config, err := loader.Load()
+
+	ok(t, err)
+
+	equals(t, "fgrehm/devstep:v0.1.0", config.SourceImage)
+	equals(t, "fgrehm/devstep:v0.1.0", config.BaseImage)
+	equals(t, projectRoot, config.HostDir)
+	equals(t, "/workspace", config.GuestDir)
+	equals(t, "/tmp/devstep/cache", config.CacheDir)
+	equals(t, "devstep/a-project-dir", config.RepositoryName)
+}
+
 func Test_SourceImageGetsSetWhenRepositoryTagExists(t *testing.T) {
 	loader, client := newConfigLoader("", "/path/to/a-project")
 

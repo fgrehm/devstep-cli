@@ -59,12 +59,24 @@ func (l *configLoader) Load() (*ProjectConfig, error) {
 			return nil, errors.New("Repository name can't be set globally")
 		}
 
-		config.SourceImage = yamlConf.SourceImage
-		config.CacheDir = yamlConf.CacheDir
-		config.GuestDir = yamlConf.GuestDir
-		config.Defaults.Links = yamlConf.Links
-		config.Defaults.Volumes = yamlConf.Volumes
-		config.Defaults.Env = yamlConf.Env
+		if yamlConf.SourceImage != "" {
+			config.SourceImage = yamlConf.SourceImage
+		}
+		if yamlConf.CacheDir != "" {
+			config.CacheDir = yamlConf.CacheDir
+		}
+		if yamlConf.GuestDir != "" {
+			config.GuestDir = yamlConf.GuestDir
+		}
+		if yamlConf.Links != nil {
+			config.Defaults.Links = yamlConf.Links
+		}
+		if yamlConf.Volumes != nil {
+			config.Defaults.Volumes = yamlConf.Volumes
+		}
+		if yamlConf.Env != nil {
+			config.Defaults.Env = yamlConf.Env
+		}
 
 		if yamlConf.Hack != nil {
 			config.HackOpts.Links = yamlConf.Hack.Links
