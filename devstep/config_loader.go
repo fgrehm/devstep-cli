@@ -1,6 +1,7 @@
 package devstep
 
 import (
+	"errors"
 	"gopkg.in/yaml.v1"
 	"os"
 	"path/filepath"
@@ -14,6 +15,11 @@ type configLoader struct {
 	client        DockerClient
 	homeDirectory string
 	projectRoot   string
+}
+
+type yamlConfig struct {
+	RepositoryName string `yaml:"repository"`
+	SourceImage    string `yaml:"source_image"`
 }
 
 func (l *configLoader) Load() (*ProjectConfig, error) {
@@ -40,28 +46,36 @@ func (l *configLoader) Load() (*ProjectConfig, error) {
 		config.BaseImage = config.RepositoryName + ":" + tags[0]
 	}
 
-	configFile := l.homeDirectory + "/devstep.yml"
-
-	if err = loadConfig(config, configFile); err != nil {
+	homeConfigFile := l.homeDirectory + "/devstep.yml"
+	yamlConf, err := loadConfig(homeConfigFile)
+	if err != nil {
 		return nil, err
 	}
+	if yamlConf != nil {
+		log.Info("Loaded config from home dir: %+v", yamlConf)
+		if yamlConf.RepositoryName != "" {
+			return nil, errors.New("Repository name can't be set globally")
+		}
 
-	log.Info("Loaded config: %+v", config)
+		config.SourceImage = yamlConf.SourceImage
+	}
+
+	log.Info("Final config: %+v", config)
 
 	return config, nil
 }
 
-func loadConfig(config *ProjectConfig, configPath string) error {
+func loadConfig(configPath string) (*yamlConfig, error) {
 	configInfo, err := os.Stat(configPath)
 	// File does not exist or is a directory
 	if err != nil || configInfo.IsDir() {
-		return nil
+		return nil, nil
 	}
 
 	// Parse yaml
 	file, err := os.Open(configPath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer file.Close()
 
@@ -72,16 +86,10 @@ func loadConfig(config *ProjectConfig, configPath string) error {
 	err = yaml.Unmarshal(data, &c)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	config.RepositoryName = c.Repository
-
-	return nil
-}
-
-type yamlConfig struct {
-	Repository string
+	return c, nil
 }
 
 func NewConfigLoader(client DockerClient, homeDirectory, projectRoot string) ConfigLoader {

@@ -2,7 +2,6 @@ package devstep_test
 
 import (
 	"errors"
-	"fmt"
 	"github.com/fgrehm/devstep-cli/devstep"
 	"io/ioutil"
 	"os"
@@ -63,8 +62,7 @@ func Test_LoadConfigFromHomeDir(t *testing.T) {
 	defer configFile.Close()
 	defer os.RemoveAll(tempDir)
 
-	ret, err := configFile.WriteString("repository: 'custom/repository'")
-	fmt.Println(ret, err)
+	configFile.WriteString("source_image: 'source/image:tag'")
 	configFile.Sync()
 
 	client := NewMockClient()
@@ -74,5 +72,21 @@ func Test_LoadConfigFromHomeDir(t *testing.T) {
 
 	ok(t, err)
 
-	equals(t, "custom/repository", config.RepositoryName)
+	equals(t, "source/image:tag", config.SourceImage)
+}
+
+func Test_RepositoryNameCantBeSetFromHomeDir(t *testing.T) {
+	tempDir, _ := ioutil.TempDir("", "devstep-project-")
+	configFile, _ := os.Create(tempDir + "/devstep.yml")
+	defer configFile.Close()
+	defer os.RemoveAll(tempDir)
+
+	configFile.WriteString("repository: 'custom/repository'")
+	configFile.Sync()
+
+	client := NewMockClient()
+	loader := devstep.NewConfigLoader(client, tempDir, "")
+
+	_, err := loader.Load()
+	assert(t, err != nil, "Repository name was allowed from home dir")
 }
