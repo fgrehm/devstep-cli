@@ -23,6 +23,11 @@ type yamlConfig struct {
 	RepositoryName string `yaml:"repository"`
 	SourceImage    string `yaml:"source_image"`
 	CacheDir       string `yaml:"cache_dir"`
+	GuestDir       string `yaml:"working_dir"`
+	Links          []string `yaml:"links"`
+	Volumes        []string `yaml:"volumes"`
+	Env            map[string]string `yaml:"environment"`
+	Hack           *yamlConfig `yaml:"hack"`
 }
 
 func NewConfigLoader(client DockerClient, homeDirectory, projectRoot string) ConfigLoader {
@@ -56,6 +61,16 @@ func (l *configLoader) Load() (*ProjectConfig, error) {
 
 		config.SourceImage = yamlConf.SourceImage
 		config.CacheDir = yamlConf.CacheDir
+		config.GuestDir = yamlConf.GuestDir
+		config.Defaults.Links = yamlConf.Links
+		config.Defaults.Volumes = yamlConf.Volumes
+		config.Defaults.Env = yamlConf.Env
+
+		if yamlConf.Hack != nil {
+			config.HackOpts.Links = yamlConf.Hack.Links
+			config.HackOpts.Volumes = yamlConf.Hack.Volumes
+			config.HackOpts.Env = yamlConf.Hack.Env
+		}
 	}
 
 	log.Info("Config loaded")
@@ -73,6 +88,8 @@ func (l *configLoader) buildDefaultConfig() (*ProjectConfig, error) {
 		HostDir:        l.projectRoot,
 		GuestDir:       "/workspace",
 		CacheDir:       "/tmp/devstep/cache",
+		Defaults:       &DockerRunOpts{},
+		HackOpts:       &DockerRunOpts{},
 	}
 
 	tags, err := l.client.ListTags(repositoryName)

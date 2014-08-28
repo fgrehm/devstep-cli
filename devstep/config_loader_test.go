@@ -58,6 +58,26 @@ func Test_LoadConfigFromHomeDir(t *testing.T) {
 	writeFile(tempDir+"/devstep.yml", `
 source_image: 'source/image:tag'
 cache_dir:    '/custom/cache/dir'
+working_dir:  '/path/to/guest/dir'
+links:
+- "cname:name"
+- "other_cname:other_name"
+volumes:
+- "/host/dir:/guest/dir"
+- "/other/host/dir:/other/guest/dir"
+environment:
+  RACK_ENV: "production"
+  RAILS_ENV: "staging"
+hack:
+  links:
+  - "hcname:hname"
+  - "hother_cname:hother_name"
+  volumes:
+  - "/h/host/dir:/h/guest/dir"
+  - "/h/other/host/dir:/h/other/guest/dir"
+  environment:
+    RACK_ENV: "h-production"
+    RAILS_ENV: "h-staging"
 `)
 	defer os.RemoveAll(tempDir)
 
@@ -68,6 +88,17 @@ cache_dir:    '/custom/cache/dir'
 
 	equals(t, "source/image:tag", config.SourceImage)
 	equals(t, "/custom/cache/dir", config.CacheDir)
+	equals(t, "/path/to/guest/dir", config.GuestDir)
+
+	assert(t, config.Defaults != nil, "Defaults were not parsed")
+	equals(t, []string{"cname:name", "other_cname:other_name"}, config.Defaults.Links)
+	equals(t, []string{"/host/dir:/guest/dir", "/other/host/dir:/other/guest/dir"}, config.Defaults.Volumes)
+	equals(t, map[string]string{"RACK_ENV": "production", "RAILS_ENV": "staging"}, config.Defaults.Env)
+
+	assert(t, config.HackOpts != nil, "Hack options were not parsed")
+	equals(t, []string{"hcname:hname", "hother_cname:hother_name"}, config.HackOpts.Links)
+	equals(t, []string{"/h/host/dir:/h/guest/dir", "/h/other/host/dir:/h/other/guest/dir"}, config.HackOpts.Volumes)
+	equals(t, map[string]string{"RACK_ENV": "h-production", "RAILS_ENV": "h-staging"}, config.HackOpts.Env)
 }
 
 func Test_LoadConfigFromHomeDirWithTemplates(t *testing.T) {
