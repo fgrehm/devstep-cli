@@ -48,7 +48,7 @@ func (l *configLoader) Load() (*ProjectConfig, error) {
 		return nil, err
 	}
 
-	yamlConf, err := loadConfig(l.homeDirectory + "/devstep.yml")
+	yamlConf, err := parseYaml(l.homeDirectory + "/devstep.yml")
 	if err != nil {
 		return nil, err
 	}
@@ -58,31 +58,16 @@ func (l *configLoader) Load() (*ProjectConfig, error) {
 		if yamlConf.RepositoryName != "" {
 			return nil, errors.New("Repository name can't be set globally")
 		}
-
-		if yamlConf.SourceImage != "" {
-			config.SourceImage = yamlConf.SourceImage
-		}
-		if yamlConf.CacheDir != "" {
-			config.CacheDir = yamlConf.CacheDir
-		}
-		if yamlConf.GuestDir != "" {
-			config.GuestDir = yamlConf.GuestDir
-		}
-		if yamlConf.Links != nil {
-			config.Defaults.Links = yamlConf.Links
-		}
-		if yamlConf.Volumes != nil {
-			config.Defaults.Volumes = yamlConf.Volumes
-		}
-		if yamlConf.Env != nil {
-			config.Defaults.Env = yamlConf.Env
-		}
-
-		if yamlConf.Hack != nil {
-			config.HackOpts.Links = yamlConf.Hack.Links
-			config.HackOpts.Volumes = yamlConf.Hack.Volumes
-			config.HackOpts.Env = yamlConf.Hack.Env
-		}
+		assignYamlValues(yamlConf, config)
+	}
+	yamlConf, err = parseYaml(l.projectRoot + "/devstep.yml")
+	if err != nil {
+		return nil, err
+	}
+	if yamlConf != nil {
+		log.Info("Loaded config from project dir")
+		log.Debug("Home dir config: %+v", yamlConf)
+		assignYamlValues(yamlConf, config)
 	}
 
 	log.Info("Config loaded")
@@ -115,7 +100,7 @@ func (l *configLoader) buildDefaultConfig() (*ProjectConfig, error) {
 	return config, nil
 }
 
-func loadConfig(configPath string) (*yamlConfig, error) {
+func parseYaml(configPath string) (*yamlConfig, error) {
 	configInfo, err := os.Stat(configPath)
 	// File does not exist or is a directory
 	if err != nil || configInfo.IsDir() {
@@ -152,4 +137,34 @@ func loadConfig(configPath string) (*yamlConfig, error) {
 	}
 
 	return c, nil
+}
+
+func assignYamlValues(yamlConf *yamlConfig, config *ProjectConfig) {
+	if yamlConf.RepositoryName != "" {
+		config.RepositoryName = yamlConf.RepositoryName
+	}
+	if yamlConf.SourceImage != "" {
+		config.SourceImage = yamlConf.SourceImage
+	}
+	if yamlConf.CacheDir != "" {
+		config.CacheDir = yamlConf.CacheDir
+	}
+	if yamlConf.GuestDir != "" {
+		config.GuestDir = yamlConf.GuestDir
+	}
+	if yamlConf.Links != nil {
+		config.Defaults.Links = yamlConf.Links
+	}
+	if yamlConf.Volumes != nil {
+		config.Defaults.Volumes = yamlConf.Volumes
+	}
+	if yamlConf.Env != nil {
+		config.Defaults.Env = yamlConf.Env
+	}
+
+	if yamlConf.Hack != nil {
+		config.HackOpts.Links = yamlConf.Hack.Links
+		config.HackOpts.Volumes = yamlConf.Hack.Volumes
+		config.HackOpts.Env = yamlConf.Hack.Env
+	}
 }

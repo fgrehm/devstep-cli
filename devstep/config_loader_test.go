@@ -141,6 +141,77 @@ cache_dir:    '{{env "BAR"}}/cache-dir'
 	equals(t, "bar-val/cache-dir", config.CacheDir)
 }
 
+func Test_LoadConfigFromProjectDir(t *testing.T) {
+	tempDir, _ := ioutil.TempDir("", "devstep-project-")
+	writeFile(tempDir+"/devstep.yml", `
+repository:   'repo/name'
+source_image: 'source/image:tag'
+cache_dir:    '/custom/cache/dir'
+working_dir:  '/path/to/guest/dir'
+links:
+- "cname:name"
+- "other_cname:other_name"
+volumes:
+- "/host/dir:/guest/dir"
+- "/other/host/dir:/other/guest/dir"
+environment:
+  RACK_ENV: "production"
+  RAILS_ENV: "staging"
+hack:
+  links:
+  - "hcname:hname"
+  - "hother_cname:hother_name"
+  volumes:
+  - "/h/host/dir:/h/guest/dir"
+  - "/h/other/host/dir:/h/other/guest/dir"
+  environment:
+    RACK_ENV: "h-production"
+    RAILS_ENV: "h-staging"
+`)
+	defer os.RemoveAll(tempDir)
+
+	loader, _ := newConfigLoader("/tmp/wrong", tempDir)
+	config, err := loader.Load()
+
+	ok(t, err)
+
+	equals(t, "repo/name", config.RepositoryName)
+    equals(t, "source/image:tag", config.SourceImage)
+	equals(t, "/custom/cache/dir", config.CacheDir)
+	equals(t, "/path/to/guest/dir", config.GuestDir)
+
+	assert(t, config.Defaults != nil, "Defaults were not parsed")
+	equals(t, []string{"cname:name", "other_cname:other_name"}, config.Defaults.Links)
+	equals(t, []string{"/host/dir:/guest/dir", "/other/host/dir:/other/guest/dir"}, config.Defaults.Volumes)
+	equals(t, map[string]string{"RACK_ENV": "production", "RAILS_ENV": "staging"}, config.Defaults.Env)
+
+	assert(t, config.HackOpts != nil, "Hack options were not parsed")
+	equals(t, []string{"hcname:hname", "hother_cname:hother_name"}, config.HackOpts.Links)
+	equals(t, []string{"/h/host/dir:/h/guest/dir", "/h/other/host/dir:/h/other/guest/dir"}, config.HackOpts.Volumes)
+	equals(t, map[string]string{"RACK_ENV": "h-production", "RAILS_ENV": "h-staging"}, config.HackOpts.Env)
+}
+
+func Test_LoadConfigFromProjectDirWithTemplates(t *testing.T) {
+	os.Setenv("foo", "foo-value")
+	os.Setenv("BAR", "bar-val")
+	defer os.Clearenv()
+
+	tempDir, _ := ioutil.TempDir("", "devstep-project-")
+	writeFile(tempDir+"/devstep.yml", `
+source_image: '{{env "foo"}}/image:tag'
+cache_dir:    '{{env "BAR"}}/cache-dir'
+`)
+	defer os.RemoveAll(tempDir)
+
+	loader, _ := newConfigLoader("/tmp/wrong", tempDir)
+	config, err := loader.Load()
+
+	ok(t, err)
+
+	equals(t, "foo-value/image:tag", config.SourceImage)
+	equals(t, "bar-val/cache-dir", config.CacheDir)
+}
+
 func Test_RepositoryNameCantBeSetFromHomeDir(t *testing.T) {
 	tempDir, _ := ioutil.TempDir("", "devstep-project-")
 	writeFile(tempDir+"/devstep.yml", "repository: 'custom/repository'")
