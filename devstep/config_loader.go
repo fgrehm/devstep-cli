@@ -123,7 +123,7 @@ func parseYaml(configPath string) (*yamlConfig, error) {
 
 	tmpl, err := template.New("config").Funcs(funcMap).Parse(string(data))
 	if err != nil {
-		return nil, err
+		return nil, errors.New("Error parsing '" + configPath + "'\n  " + err.Error())
 	}
 
 	var b bytes.Buffer
@@ -133,7 +133,7 @@ func parseYaml(configPath string) (*yamlConfig, error) {
 	err = yaml.Unmarshal(b.Bytes(), &c)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.New("Error parsing '" + configPath + "'\n  " + err.Error())
 	}
 
 	return c, nil
