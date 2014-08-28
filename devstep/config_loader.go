@@ -33,7 +33,6 @@ func NewConfigLoader(client DockerClient, homeDirectory, projectRoot string) Con
 
 func (l *configLoader) Load() (*ProjectConfig, error) {
 	log.Info("Loading configuration for %s", l.projectRoot)
-	// TODO: Load config from home directory
 	// TODO: Load config from project directory
 	// TODO: Handle errors
 

@@ -9,9 +9,8 @@ import (
 )
 
 func Test_Defaults(t *testing.T) {
-	client := NewMockClient()
 	projectRoot := "/path/to/a-project-dir"
-	loader := devstep.NewConfigLoader(client, "", projectRoot)
+	loader, _ := newConfigLoader("", projectRoot)
 
 	config, err := loader.Load()
 
@@ -26,8 +25,7 @@ func Test_Defaults(t *testing.T) {
 }
 
 func Test_SourceImageGetsSetWhenRepositoryTagExists(t *testing.T) {
-	client := NewMockClient()
-	loader := devstep.NewConfigLoader(client, "", "/path/to/a-project")
+	loader, client := newConfigLoader("", "/path/to/a-project")
 
 	var repositoryNameSearched string
 	client.ListTagsFunc = func(r string) ([]string, error) {
@@ -43,14 +41,13 @@ func Test_SourceImageGetsSetWhenRepositoryTagExists(t *testing.T) {
 }
 
 func Test_ErrorWhenListTagsFails(t *testing.T) {
-	client := NewMockClient()
+	loader, client := newConfigLoader("", "")
 
 	listError := errors.New("Some Error!")
 	client.ListTagsFunc = func(repositoryName string) ([]string, error) {
 		return nil, listError
 	}
 
-	loader := devstep.NewConfigLoader(client, "", "")
 	_, err := loader.Load()
 
 	equals(t, listError, err)
@@ -58,19 +55,13 @@ func Test_ErrorWhenListTagsFails(t *testing.T) {
 
 func Test_LoadConfigFromHomeDir(t *testing.T) {
 	tempDir, _ := ioutil.TempDir("", "devstep-project-")
-	configFile, _ := os.Create(tempDir + "/devstep.yml")
-	defer configFile.Close()
-	defer os.RemoveAll(tempDir)
-
-	configFile.WriteString(`
+	writeFile(tempDir + "/devstep.yml", `
 source_image: 'source/image:tag'
 cache_dir:    '/custom/cache/dir'
 `)
-	configFile.Sync()
+	defer os.RemoveAll(tempDir)
 
-	client := NewMockClient()
-	loader := devstep.NewConfigLoader(client, tempDir, "")
-
+	loader, _ := newConfigLoader(tempDir, "")
 	config, err := loader.Load()
 
 	ok(t, err)
@@ -81,16 +72,25 @@ cache_dir:    '/custom/cache/dir'
 
 func Test_RepositoryNameCantBeSetFromHomeDir(t *testing.T) {
 	tempDir, _ := ioutil.TempDir("", "devstep-project-")
-	configFile, _ := os.Create(tempDir + "/devstep.yml")
-	defer configFile.Close()
+	writeFile(tempDir + "/devstep.yml", "repository: 'custom/repository'")
 	defer os.RemoveAll(tempDir)
 
-	configFile.WriteString("repository: 'custom/repository'")
-	configFile.Sync()
-
-	client := NewMockClient()
-	loader := devstep.NewConfigLoader(client, tempDir, "")
+	loader, _ := newConfigLoader(tempDir, "")
 
 	_, err := loader.Load()
 	assert(t, err != nil, "Repository name was allowed from home dir")
+}
+
+func newConfigLoader(homeDir, projectDir string) (devstep.ConfigLoader, *MockClient) {
+	client := NewMockClient()
+	loader := devstep.NewConfigLoader(client, homeDir, projectDir)
+
+	return loader, client
+}
+
+func writeFile(path, yaml string) {
+	file, _ := os.Create(path)
+	defer file.Close()
+	file.WriteString(yaml)
+	file.Sync()
 }
