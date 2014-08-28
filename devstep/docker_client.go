@@ -22,6 +22,7 @@ type DockerRunOpts struct {
 	AutoRemove bool
 	Pty        bool
 	Workdir    string
+	Privileged bool
 	Env        map[string]string
 	Volumes    []string
 	Links      []string
@@ -44,10 +45,16 @@ type dockerClient struct {
 }
 
 func (c *dockerClient) Run(opts *DockerRunOpts) (*DockerRunResult, error) {
+	env := []string{}
+	for k, v := range opts.Env {
+		env = append(env, k + "='" + v + "'")
+	}
+
 	createOpts := docker.CreateContainerOptions{
 		Config: &docker.Config{
 			Image:        opts.Image,
 			Cmd:          opts.Cmd,
+			Env:          env,
 			OpenStdin:    opts.Pty,
 			StdinOnce:    opts.Pty,
 			AttachStdin:  opts.Pty,
@@ -69,7 +76,11 @@ func (c *dockerClient) Run(opts *DockerRunOpts) (*DockerRunResult, error) {
 		defer c.RemoveContainer(container.ID)
 	}
 
-	hostConfig := &docker.HostConfig{Binds: opts.Volumes}
+	hostConfig := &docker.HostConfig{
+		Binds:      opts.Volumes,
+		Links:      opts.Links,
+		Privileged: opts.Privileged,
+	}
 	log.Debug("HostConfig: %+v", hostConfig)
 
 	if opts.Pty {

@@ -41,6 +41,7 @@ func Test_DefaultsWithBlankValuesOnYaml(t *testing.T) {
 	equals(t, "/workspace", config.GuestDir)
 	equals(t, "/tmp/devstep/cache", config.CacheDir)
 	equals(t, "devstep/a-project-dir", config.RepositoryName)
+    assert(t, !config.Defaults.Privileged, "Privileged is set by default")
 }
 
 func Test_SourceImageGetsSetWhenRepositoryTagExists(t *testing.T) {
@@ -148,6 +149,7 @@ repository:   'repo/name'
 source_image: 'source/image:tag'
 cache_dir:    '/custom/cache/dir'
 working_dir:  '/path/to/guest/dir'
+privileged:   true
 links:
 - "cname:name"
 - "other_cname:other_name"
@@ -179,6 +181,7 @@ hack:
     equals(t, "source/image:tag", config.SourceImage)
 	equals(t, "/custom/cache/dir", config.CacheDir)
 	equals(t, "/path/to/guest/dir", config.GuestDir)
+    assert(t, config.Defaults.Privileged, "Privileged is not set")
 
 	assert(t, config.Defaults != nil, "Defaults were not parsed")
 	equals(t, []string{"cname:name", "other_cname:other_name"}, config.Defaults.Links)
@@ -297,6 +300,17 @@ func Test_RepositoryNameCantBeSetFromHomeDir(t *testing.T) {
 
 	_, err := loader.Load()
 	assert(t, err != nil, "Repository name was allowed from home dir")
+}
+
+func Test_PrivilegedCantBeSetFromHomeDir(t *testing.T) {
+    tempDir, _ := ioutil.TempDir("", "devstep-project-")
+    writeFile(tempDir+"/devstep.yml", "privileged: true")
+    defer os.RemoveAll(tempDir)
+
+    loader, _ := newConfigLoader(tempDir, "")
+
+    _, err := loader.Load()
+    assert(t, err != nil, "Privileged was allowed from home dir")
 }
 
 func newConfigLoader(homeDir, projectDir string) (devstep.ConfigLoader, *MockClient) {

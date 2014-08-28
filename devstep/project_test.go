@@ -33,7 +33,50 @@ func Test_Hack(t *testing.T) {
 	equals(t, "/path/on/guest", runOpts.Workdir)
 
 	assert(t, inArray("/path/on/host:/path/on/guest", runOpts.Volumes), "Project dir was not shared")
-	assert(t, inArray("/tmp/devstep/cache:/.devstep/cache", runOpts.Volumes), "Cache dir was not shared")
+	assert(t, inArray("/cache/path/on/host:/.devstep/cache", runOpts.Volumes), "Cache dir was not shared")
+}
+
+func Test_HackUsesDockerConfigs(t *testing.T) {
+	project, err := devstep.NewProject(&devstep.ProjectConfig{
+		HostDir:   "/path/on/host",
+		GuestDir:  "/path/on/guest",
+		CacheDir:  "/cache/path/on/host",
+		Defaults:  &devstep.DockerRunOpts{
+			Privileged: true,
+			Links:   []string{"some:link"},
+			Volumes: []string{"/some:/volume"},
+			Env:     map[string]string{"SOME": "ENV"},
+		},
+		HackOpts:  &devstep.DockerRunOpts{
+			Links:   []string{"other:link"},
+			Volumes: []string{"/other:/volume"},
+			Env:     map[string]string{"OTHER": "VALUE"},
+		},
+	})
+	ok(t, err)
+
+	var runOpts *devstep.DockerRunOpts
+	clientMock := NewMockClient()
+	clientMock.RunFunc = func(o *devstep.DockerRunOpts) (*devstep.DockerRunResult, error) {
+		runOpts = o
+		return nil, nil
+	}
+
+	err = project.Hack(clientMock)
+	ok(t, err)
+
+	assert(t, runOpts.Privileged, "Privileged is false")
+
+	assert(t, inArray("/path/on/host:/path/on/guest", runOpts.Volumes), "Project dir was not shared")
+	assert(t, inArray("/cache/path/on/host:/.devstep/cache", runOpts.Volumes), "Cache dir was not shared")
+
+	assert(t, inArray("/some:/volume", runOpts.Volumes), "Default volumes were not set")
+	assert(t, inArray("some:link", runOpts.Links), "Default links were not set")
+	equals(t, "ENV", runOpts.Env["SOME"])
+
+	assert(t, inArray("/other:/volume", runOpts.Volumes), "Hack volumes were not set")
+	assert(t, inArray("other:link", runOpts.Links), "Hack links were not set")
+	equals(t, "VALUE", runOpts.Env["OTHER"])
 }
 
 func Test_Build(t *testing.T) {
@@ -75,7 +118,7 @@ func Test_Build(t *testing.T) {
 	equals(t, []string{"/.devstep/bin/build-project", "/path/on/guest"}, runOpts.Cmd)
 	equals(t, "/path/on/guest", runOpts.Workdir)
 	assert(t, inArray("/path/on/host:/path/on/guest", runOpts.Volumes), "Project dir was not shared")
-	assert(t, inArray("/tmp/devstep/cache:/.devstep/cache", runOpts.Volumes), "Cache dir was not shared")
+	assert(t, inArray("/cache/path/on/host:/.devstep/cache", runOpts.Volumes), "Cache dir was not shared")
 
 	equals(t, 2, len(commitOpts))
 
@@ -91,6 +134,62 @@ func Test_Build(t *testing.T) {
 	assert(t, timestampTagCommit.Tag != "", "Tag not set")
 
 	equals(t, "cid", removeId)
+}
+
+func Test_BuildUsesGlobalDockerConfigs(t *testing.T) {
+	project, err := devstep.NewProject(&devstep.ProjectConfig{
+		HostDir:   "/path/on/host",
+		GuestDir:  "/path/on/guest",
+		CacheDir:  "/cache/path/on/host",
+		Defaults:  &devstep.DockerRunOpts{
+			Privileged: true,
+			Links:   []string{"some:link"},
+			Volumes: []string{"/some:/volume"},
+			Env:     map[string]string{"SOME": "ENV"},
+		},
+		HackOpts:  &devstep.DockerRunOpts{
+			Privileged: false,
+			Links:   []string{"other:link"},
+			Volumes: []string{"/other:/volume"},
+			Env:     map[string]string{"OTHER": "VALUE"},
+		},
+	})
+	ok(t, err)
+
+	var runOpts *devstep.DockerRunOpts
+	clientMock := NewMockClient()
+	clientMock.RunFunc = func(o *devstep.DockerRunOpts) (*devstep.DockerRunResult, error) {
+		runOpts = o
+		return &devstep.DockerRunResult{
+			ExitCode:    0,
+			ContainerID: "cid",
+		}, nil
+	}
+	var commitOpts []*devstep.DockerCommitOpts
+	clientMock.CommitFunc = func(o *devstep.DockerCommitOpts) error {
+		commitOpts = append(commitOpts, o)
+		return nil
+	}
+	var removeId string
+	clientMock.RemoveContainerFunc = func(r string) error {
+		removeId = r
+		return nil
+	}
+
+	err = project.Build(clientMock)
+	ok(t, err)
+
+	assert(t, runOpts.Privileged, "Privileged is set to false")
+	assert(t, inArray("/path/on/host:/path/on/guest", runOpts.Volumes), "Project dir was not shared")
+	assert(t, inArray("/cache/path/on/host:/.devstep/cache", runOpts.Volumes), "Cache dir was not shared")
+
+	assert(t, inArray("/some:/volume", runOpts.Volumes), "Default volumes were not set")
+	assert(t, inArray("some:link", runOpts.Links), "Default links were not set")
+	equals(t, "ENV", runOpts.Env["SOME"])
+
+	assert(t, !inArray("/other:/volume", runOpts.Volumes), "Hack volumes were set")
+	assert(t, !inArray("other:link", runOpts.Links), "Hack links were set")
+	equals(t, "", runOpts.Env["OTHER"])
 }
 
 func Test_BuildWithErrorOnRun(t *testing.T) {

@@ -24,6 +24,7 @@ type yamlConfig struct {
 	SourceImage    string            `yaml:"source_image"`
 	CacheDir       string            `yaml:"cache_dir"`
 	GuestDir       string            `yaml:"working_dir"`
+	Privileged     bool              `yaml:"privileged"`
 	Links          []string          `yaml:"links"`
 	Volumes        []string          `yaml:"volumes"`
 	Env            map[string]string `yaml:"environment"`
@@ -58,6 +59,9 @@ func (l *configLoader) Load() (*ProjectConfig, error) {
 		if yamlConf.RepositoryName != "" {
 			return nil, errors.New("Repository name can't be set globally")
 		}
+		if yamlConf.Privileged {
+			return nil, errors.New("Privileged name can't be set globally")
+		}
 		assignYamlValues(yamlConf, config)
 	}
 	yamlConf, err = parseYaml(l.projectRoot + "/devstep.yml")
@@ -68,6 +72,7 @@ func (l *configLoader) Load() (*ProjectConfig, error) {
 		log.Info("Loaded config from project dir")
 		log.Debug("Home dir config: %+v", yamlConf)
 		assignYamlValues(yamlConf, config)
+		config.Defaults.Privileged = yamlConf.Privileged
 	}
 
 	log.Info("Config loaded")
