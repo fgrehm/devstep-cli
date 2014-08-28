@@ -55,7 +55,7 @@ func Test_ErrorWhenListTagsFails(t *testing.T) {
 
 func Test_LoadConfigFromHomeDir(t *testing.T) {
 	tempDir, _ := ioutil.TempDir("", "devstep-project-")
-	writeFile(tempDir + "/devstep.yml", `
+	writeFile(tempDir+"/devstep.yml", `
 source_image: 'source/image:tag'
 cache_dir:    '/custom/cache/dir'
 `)
@@ -72,7 +72,7 @@ cache_dir:    '/custom/cache/dir'
 
 func Test_RepositoryNameCantBeSetFromHomeDir(t *testing.T) {
 	tempDir, _ := ioutil.TempDir("", "devstep-project-")
-	writeFile(tempDir + "/devstep.yml", "repository: 'custom/repository'")
+	writeFile(tempDir+"/devstep.yml", "repository: 'custom/repository'")
 	defer os.RemoveAll(tempDir)
 
 	loader, _ := newConfigLoader(tempDir, "")
