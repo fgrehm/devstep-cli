@@ -1,10 +1,12 @@
 package devstep
 
 import (
+	"bytes"
 	"errors"
 	"gopkg.in/yaml.v1"
 	"os"
 	"path/filepath"
+	"text/template"
 )
 
 type ConfigLoader interface {
@@ -101,8 +103,20 @@ func loadConfig(configPath string) (*yamlConfig, error) {
 	data := make([]byte, configInfo.Size())
 	_, err = file.Read(data)
 
+	funcMap := template.FuncMap {
+        "env": os.Getenv,
+    }
+
+	tmpl, err := template.New("config").Funcs(funcMap).Parse(string(data))
+	if err != nil {
+		return nil, err
+	}
+
+	var b bytes.Buffer
+	tmpl.ExecuteTemplate(&b, "config", struct{}{})
+
 	c := &yamlConfig{}
-	err = yaml.Unmarshal(data, &c)
+	err = yaml.Unmarshal(b.Bytes(), &c)
 
 	if err != nil {
 		return nil, err

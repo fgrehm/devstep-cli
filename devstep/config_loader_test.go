@@ -70,6 +70,27 @@ cache_dir:    '/custom/cache/dir'
 	equals(t, "/custom/cache/dir", config.CacheDir)
 }
 
+func Test_LoadConfigFromHomeDirWithTemplates(t *testing.T) {
+	os.Setenv("foo", "foo-value")
+	os.Setenv("BAR", "bar-val")
+	defer os.Clearenv()
+
+	tempDir, _ := ioutil.TempDir("", "devstep-project-")
+	writeFile(tempDir+"/devstep.yml", `
+source_image: '{{env "foo"}}/image:tag'
+cache_dir:    '{{env "BAR"}}/cache-dir'
+`)
+	defer os.RemoveAll(tempDir)
+
+	loader, _ := newConfigLoader(tempDir, "")
+	config, err := loader.Load()
+
+	ok(t, err)
+
+	equals(t, "foo-value/image:tag", config.SourceImage)
+	equals(t, "bar-val/cache-dir", config.CacheDir)
+}
+
 func Test_RepositoryNameCantBeSetFromHomeDir(t *testing.T) {
 	tempDir, _ := ioutil.TempDir("", "devstep-project-")
 	writeFile(tempDir+"/devstep.yml", "repository: 'custom/repository'")
