@@ -85,8 +85,8 @@ func (l *configLoader) buildDefaultConfig() (*ProjectConfig, error) {
 		HostDir:        l.projectRoot,
 		GuestDir:       "/workspace",
 		CacheDir:       "/tmp/devstep/cache",
-		Defaults:       &DockerRunOpts{},
-		HackOpts:       &DockerRunOpts{},
+		Defaults:       &DockerRunOpts{Env: make(map[string]string)},
+		HackOpts:       &DockerRunOpts{Env: make(map[string]string)},
 	}
 
 	tags, err := l.client.ListTags(repositoryName)
@@ -153,18 +153,28 @@ func assignYamlValues(yamlConf *yamlConfig, config *ProjectConfig) {
 		config.GuestDir = yamlConf.GuestDir
 	}
 	if yamlConf.Links != nil {
-		config.Defaults.Links = yamlConf.Links
+		config.Defaults.Links = append(config.Defaults.Links, yamlConf.Links...)
 	}
 	if yamlConf.Volumes != nil {
-		config.Defaults.Volumes = yamlConf.Volumes
+		config.Defaults.Volumes = append(config.Defaults.Volumes, yamlConf.Volumes...)
 	}
 	if yamlConf.Env != nil {
-		config.Defaults.Env = yamlConf.Env
+		for k, v := range yamlConf.Env {
+			config.Defaults.Env[k] = v
+		}
 	}
 
 	if yamlConf.Hack != nil {
-		config.HackOpts.Links = yamlConf.Hack.Links
-		config.HackOpts.Volumes = yamlConf.Hack.Volumes
-		config.HackOpts.Env = yamlConf.Hack.Env
+		if yamlConf.Hack.Links != nil {
+			config.HackOpts.Links = append(config.HackOpts.Links, yamlConf.Hack.Links...)
+		}
+		if yamlConf.Hack.Volumes != nil {
+			config.HackOpts.Volumes = append(config.HackOpts.Volumes, yamlConf.Hack.Volumes...)
+		}
+		if yamlConf.Hack.Env != nil {
+			for k, v := range yamlConf.Hack.Env {
+				config.HackOpts.Env[k] = v
+			}
+		}
 	}
 }

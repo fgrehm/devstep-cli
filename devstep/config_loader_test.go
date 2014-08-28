@@ -191,6 +191,82 @@ hack:
 	equals(t, map[string]string{"RACK_ENV": "h-production", "RAILS_ENV": "h-staging"}, config.HackOpts.Env)
 }
 
+func Test_MergeGlobalConfigsWithProjectConfigs(t *testing.T) {
+    tempHomeDir, _ := ioutil.TempDir("", "devstep-home-")
+    writeFile(tempHomeDir+"/devstep.yml", `
+source_image: 'source/image:tag'
+cache_dir:    '/custom/cache/dir'
+working_dir:  '/path/to/guest/dir'
+links:
+- "cname:name"
+- "other_cname:other_name"
+volumes:
+- "/host/dir:/guest/dir"
+- "/other/host/dir:/other/guest/dir"
+environment:
+  RACK_ENV: "production"
+  RAILS_ENV: "staging"
+hack:
+  links:
+  - "hcname:hname"
+  - "hother_cname:hother_name"
+  volumes:
+  - "/h/host/dir:/h/guest/dir"
+  - "/h/other/host/dir:/h/other/guest/dir"
+  environment:
+    RACK_ENV: "h-production"
+    RAILS_ENV: "h-staging"
+`)
+    defer os.RemoveAll(tempHomeDir)
+
+    tempProjDir, _ := ioutil.TempDir("", "devstep-project-")
+    writeFile(tempProjDir+"/devstep.yml", `
+repository:   'repo/name'
+source_image: 'p-source/image:tag'
+cache_dir:    '/p-custom/cache/dir'
+working_dir:  '/p-path/to/guest/dir'
+links:
+- "p-cname:name"
+- "p-other_cname:other_name"
+volumes:
+- "/p/host/dir:/guest/dir"
+- "/p/other/host/dir:/other/guest/dir"
+environment:
+  RACK_ENV: "p-production"
+  DATABASE_URL: "some-url"
+hack:
+  links:
+  - "p-hcname:hname"
+  - "p-hother_cname:hother_name"
+  volumes:
+  - "/p/h/host/dir:/p/h/guest/dir"
+  - "/p/h/other/host/dir:/p/h/other/guest/dir"
+  environment:
+    RACK_ENV: "p-h-production"
+    DATABASE_URL: "h-some-url"
+`)
+    defer os.RemoveAll(tempProjDir)
+    loader, _ := newConfigLoader(tempHomeDir, tempProjDir)
+    config, err := loader.Load()
+
+    ok(t, err)
+
+    equals(t, "repo/name", config.RepositoryName)
+    equals(t, "p-source/image:tag", config.SourceImage)
+    equals(t, "/p-custom/cache/dir", config.CacheDir)
+    equals(t, "/p-path/to/guest/dir", config.GuestDir)
+
+    assert(t, config.Defaults != nil, "Defaults were not parsed")
+    equals(t, []string{"cname:name", "other_cname:other_name", "p-cname:name", "p-other_cname:other_name"}, config.Defaults.Links)
+    equals(t, []string{"/host/dir:/guest/dir", "/other/host/dir:/other/guest/dir", "/p/host/dir:/guest/dir", "/p/other/host/dir:/other/guest/dir"}, config.Defaults.Volumes)
+    equals(t, map[string]string{"RACK_ENV": "p-production", "RAILS_ENV": "staging", "DATABASE_URL": "some-url"}, config.Defaults.Env)
+
+    assert(t, config.HackOpts != nil, "Hack options were not parsed")
+    equals(t, []string{"hcname:hname", "hother_cname:hother_name", "p-hcname:hname", "p-hother_cname:hother_name"}, config.HackOpts.Links)
+    equals(t, []string{"/h/host/dir:/h/guest/dir", "/h/other/host/dir:/h/other/guest/dir", "/p/h/host/dir:/p/h/guest/dir", "/p/h/other/host/dir:/p/h/other/guest/dir"}, config.HackOpts.Volumes)
+    equals(t, map[string]string{"RACK_ENV": "p-h-production", "RAILS_ENV": "h-staging", "DATABASE_URL": "h-some-url"}, config.HackOpts.Env)
+}
+
 func Test_LoadConfigFromProjectDirWithTemplates(t *testing.T) {
 	os.Setenv("foo", "foo-value")
 	os.Setenv("BAR", "bar-val")
