@@ -23,28 +23,23 @@ type yamlConfig struct {
 	CacheDir       string `yaml:"cache_dir"`
 }
 
+func NewConfigLoader(client DockerClient, homeDirectory, projectRoot string) ConfigLoader {
+	return &configLoader{
+		client:        client,
+		homeDirectory: homeDirectory,
+		projectRoot:   projectRoot,
+	}
+}
+
 func (l *configLoader) Load() (*ProjectConfig, error) {
 	log.Info("Loading configuration for %s", l.projectRoot)
 	// TODO: Load config from home directory
 	// TODO: Load config from project directory
 	// TODO: Handle errors
 
-	repositoryName := "devstep/" + filepath.Base(l.projectRoot)
-	config := &ProjectConfig{
-		SourceImage:    "fgrehm/devstep:v0.1.0",
-		BaseImage:      "fgrehm/devstep:v0.1.0",
-		RepositoryName: repositoryName,
-		HostDir:        l.projectRoot,
-		GuestDir:       "/workspace",
-		CacheDir:       "/tmp/devstep/cache",
-	}
-
-	tags, err := l.client.ListTags(repositoryName)
+	config, err := l.buildDefaultConfig()
 	if err != nil {
 		return nil, err
-	}
-	if len(tags) > 0 {
-		config.BaseImage = config.RepositoryName + ":" + tags[0]
 	}
 
 	homeConfigFile := l.homeDirectory + "/devstep.yml"
@@ -65,6 +60,28 @@ func (l *configLoader) Load() (*ProjectConfig, error) {
 
 	log.Info("Config loaded")
 	log.Debug("Final config: %+v", config)
+
+	return config, nil
+}
+
+func (l *configLoader) buildDefaultConfig() (*ProjectConfig, error) {
+	repositoryName := "devstep/" + filepath.Base(l.projectRoot)
+	config := &ProjectConfig{
+		SourceImage:    "fgrehm/devstep:v0.1.0",
+		BaseImage:      "fgrehm/devstep:v0.1.0",
+		RepositoryName: repositoryName,
+		HostDir:        l.projectRoot,
+		GuestDir:       "/workspace",
+		CacheDir:       "/tmp/devstep/cache",
+	}
+
+	tags, err := l.client.ListTags(repositoryName)
+	if err != nil {
+		return nil, err
+	}
+	if len(tags) > 0 {
+		config.BaseImage = config.RepositoryName + ":" + tags[0]
+	}
 
 	return config, nil
 }
@@ -94,12 +111,4 @@ func loadConfig(configPath string) (*yamlConfig, error) {
 	}
 
 	return c, nil
-}
-
-func NewConfigLoader(client DockerClient, homeDirectory, projectRoot string) ConfigLoader {
-	return &configLoader{
-		client:        client,
-		homeDirectory: homeDirectory,
-		projectRoot:   projectRoot,
-	}
 }
