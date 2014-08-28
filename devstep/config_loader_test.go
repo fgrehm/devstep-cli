@@ -62,7 +62,10 @@ func Test_LoadConfigFromHomeDir(t *testing.T) {
 	defer configFile.Close()
 	defer os.RemoveAll(tempDir)
 
-	configFile.WriteString("source_image: 'source/image:tag'")
+	configFile.WriteString(`
+source_image: 'source/image:tag'
+cache_dir:    '/custom/cache/dir'
+`)
 	configFile.Sync()
 
 	client := NewMockClient()
@@ -73,6 +76,7 @@ func Test_LoadConfigFromHomeDir(t *testing.T) {
 	ok(t, err)
 
 	equals(t, "source/image:tag", config.SourceImage)
+	equals(t, "/custom/cache/dir", config.CacheDir)
 }
 
 func Test_RepositoryNameCantBeSetFromHomeDir(t *testing.T) {

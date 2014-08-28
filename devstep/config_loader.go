@@ -20,6 +20,7 @@ type configLoader struct {
 type yamlConfig struct {
 	RepositoryName string `yaml:"repository"`
 	SourceImage    string `yaml:"source_image"`
+	CacheDir       string `yaml:"cache_dir"`
 }
 
 func (l *configLoader) Load() (*ProjectConfig, error) {
@@ -52,15 +53,18 @@ func (l *configLoader) Load() (*ProjectConfig, error) {
 		return nil, err
 	}
 	if yamlConf != nil {
-		log.Info("Loaded config from home dir: %+v", yamlConf)
+		log.Info("Loaded config from home dir")
+		log.Debug("Home dir config: %+v", yamlConf)
 		if yamlConf.RepositoryName != "" {
 			return nil, errors.New("Repository name can't be set globally")
 		}
 
 		config.SourceImage = yamlConf.SourceImage
+		config.CacheDir = yamlConf.CacheDir
 	}
 
-	log.Info("Final config: %+v", config)
+	log.Info("Config loaded")
+	log.Debug("Final config: %+v", config)
 
 	return config, nil
 }
