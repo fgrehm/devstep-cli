@@ -41,8 +41,7 @@ func (l *configLoader) Load() (*ProjectConfig, error) {
 		return nil, err
 	}
 
-	homeConfigFile := l.homeDirectory + "/devstep.yml"
-	yamlConf, err := loadConfig(homeConfigFile)
+	yamlConf, err := loadConfig(l.homeDirectory + "/devstep.yml")
 	if err != nil {
 		return nil, err
 	}
