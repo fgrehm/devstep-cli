@@ -103,9 +103,9 @@ func loadConfig(configPath string) (*yamlConfig, error) {
 	data := make([]byte, configInfo.Size())
 	_, err = file.Read(data)
 
-	funcMap := template.FuncMap {
-        "env": os.Getenv,
-    }
+	funcMap := template.FuncMap{
+		"env": os.Getenv,
+	}
 
 	tmpl, err := template.New("config").Funcs(funcMap).Parse(string(data))
 	if err != nil {
