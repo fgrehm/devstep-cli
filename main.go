@@ -35,7 +35,7 @@ func newProject() devstep.Project {
 	client = devstep.NewClient("unix:///var/run/docker.sock")
 	loader := devstep.NewConfigLoader(client, homeDir(), projectRoot())
 	// TODO: Handle errors
-	config , _ := loader.Load()
+	config, _ := loader.Load()
 	project, _ = devstep.NewProject(config)
 	return project
 }

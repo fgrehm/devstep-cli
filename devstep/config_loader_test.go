@@ -2,7 +2,10 @@ package devstep_test
 
 import (
 	"errors"
+	"fmt"
 	"github.com/fgrehm/devstep-cli/devstep"
+	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -52,4 +55,24 @@ func Test_ErrorWhenListTagsFails(t *testing.T) {
 	_, err := loader.Load()
 
 	equals(t, listError, err)
+}
+
+func Test_LoadConfigFromHomeDir(t *testing.T) {
+	tempDir, _ := ioutil.TempDir("", "devstep-project-")
+	configFile, _ := os.Create(tempDir + "/devstep.yml")
+	defer configFile.Close()
+	defer os.RemoveAll(tempDir)
+
+	ret, err := configFile.WriteString("repository: 'custom/repository'")
+	fmt.Println(ret, err)
+	configFile.Sync()
+
+	client := NewMockClient()
+	loader := devstep.NewConfigLoader(client, tempDir, "")
+
+	config, err := loader.Load()
+
+	ok(t, err)
+
+	equals(t, "custom/repository", config.RepositoryName)
 }

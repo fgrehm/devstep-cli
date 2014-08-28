@@ -1,6 +1,10 @@
 package devstep
 
-import "path/filepath"
+import (
+	"gopkg.in/yaml.v1"
+	"os"
+	"path/filepath"
+)
 
 type ConfigLoader interface {
 	Load() (*ProjectConfig, error)
@@ -36,9 +40,48 @@ func (l *configLoader) Load() (*ProjectConfig, error) {
 		config.BaseImage = config.RepositoryName + ":" + tags[0]
 	}
 
+	configFile := l.homeDirectory + "/devstep.yml"
+
+	if err = loadConfig(config, configFile); err != nil {
+		return nil, err
+	}
+
 	log.Info("Loaded config: %+v", config)
 
 	return config, nil
+}
+
+func loadConfig(config *ProjectConfig, configPath string) error {
+	configInfo, err := os.Stat(configPath)
+	// File does not exist or is a directory
+	if err != nil || configInfo.IsDir() {
+		return nil
+	}
+
+	// Parse yaml
+	file, err := os.Open(configPath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	data := make([]byte, configInfo.Size())
+	_, err = file.Read(data)
+
+	c := &yamlConfig{}
+	err = yaml.Unmarshal(data, &c)
+
+	if err != nil {
+		return err
+	}
+
+	config.RepositoryName = c.Repository
+
+	return nil
+}
+
+type yamlConfig struct {
+	Repository string
 }
 
 func NewConfigLoader(client DockerClient, homeDirectory, projectRoot string) ConfigLoader {

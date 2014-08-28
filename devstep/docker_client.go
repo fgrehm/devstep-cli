@@ -111,7 +111,7 @@ func (c *dockerClient) Run(opts *DockerRunOpts) (*DockerRunResult, error) {
 
 	return &DockerRunResult{
 		ContainerID: container.ID,
-		ExitCode:  container.State.ExitCode,
+		ExitCode:    container.State.ExitCode,
 	}, nil
 }
 

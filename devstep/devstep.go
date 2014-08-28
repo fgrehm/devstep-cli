@@ -1,8 +1,8 @@
 package devstep
 
 import (
-	"os"
 	logPkg "github.com/segmentio/go-log"
+	"os"
 )
 
 var log *logPkg.Logger

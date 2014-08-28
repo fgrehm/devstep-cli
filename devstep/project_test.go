@@ -38,10 +38,10 @@ func Test_Hack(t *testing.T) {
 
 func Test_Build(t *testing.T) {
 	project, err := devstep.NewProject(&devstep.ProjectConfig{
-		BaseImage: "repo/name:tag",
-		HostDir:   "/path/on/host",
-		GuestDir:  "/path/on/guest",
-		CacheDir:  "/cache/path/on/host",
+		BaseImage:      "repo/name:tag",
+		HostDir:        "/path/on/host",
+		GuestDir:       "/path/on/guest",
+		CacheDir:       "/cache/path/on/host",
 		RepositoryName: "repo-name",
 	})
 	ok(t, err)
@@ -51,7 +51,7 @@ func Test_Build(t *testing.T) {
 	clientMock.RunFunc = func(o *devstep.DockerRunOpts) (*devstep.DockerRunResult, error) {
 		runOpts = o
 		return &devstep.DockerRunResult{
-			ExitCode: 0,
+			ExitCode:    0,
 			ContainerID: "cid",
 		}, nil
 	}

@@ -57,7 +57,7 @@ func (p *project) Build(client DockerClient) error {
 	})
 	log.Debug("Docker run result: %+v", result)
 
-	if err != nil{
+	if err != nil {
 		return err
 	}
 
