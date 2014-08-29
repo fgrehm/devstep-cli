@@ -12,6 +12,7 @@ type Project interface {
 	Build(DockerClient) error
 	Clean(DockerClient) error
 	Hack(DockerClient, *DockerRunOpts) error
+	Run(DockerClient, *DockerRunOpts) error
 }
 
 // Project specific configuration, usually parsed from an yaml file
@@ -90,6 +91,24 @@ func (p *project) Hack(client DockerClient, cliHackOpts *DockerRunOpts) error {
 		AutoRemove: true,
 		Pty:        true,
 		Cmd:        []string{"/.devstep/bin/hack"},
+		Workdir:    p.GuestDir,
+		Volumes: []string{
+			p.HostDir + ":" + p.GuestDir,
+			p.CacheDir + ":/.devstep/cache",
+		},
+	})
+
+	fmt.Printf("==> Creating container using '%s'\n", p.BaseImage)
+
+	_, err := client.Run(opts)
+	return err
+}
+
+func (p *project) Run(client DockerClient, cliRunOpts *DockerRunOpts) error {
+	opts := p.Defaults.merge(cliRunOpts, &DockerRunOpts{
+		Image:      p.BaseImage,
+		AutoRemove: true,
+		Pty:        true,
 		Workdir:    p.GuestDir,
 		Volumes: []string{
 			p.HostDir + ":" + p.GuestDir,

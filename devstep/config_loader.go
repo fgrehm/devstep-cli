@@ -73,6 +73,14 @@ func (l *configLoader) Load() (*ProjectConfig, error) {
 		config.Defaults.Privileged = yamlConf.Privileged
 	}
 
+	tags, err := l.client.ListTags(config.RepositoryName)
+	if err != nil {
+		return nil, err
+	}
+	if len(tags) > 0 {
+		config.BaseImage = config.RepositoryName + ":" + tags[0]
+	}
+
 	log.Info("Config loaded")
 	log.Debug("Final config: %+v", config)
 
@@ -90,14 +98,6 @@ func (l *configLoader) buildDefaultConfig() (*ProjectConfig, error) {
 		CacheDir:       "/tmp/devstep/cache",
 		Defaults:       &DockerRunOpts{Env: make(map[string]string)},
 		HackOpts:       &DockerRunOpts{Env: make(map[string]string)},
-	}
-
-	tags, err := l.client.ListTags(repositoryName)
-	if err != nil {
-		return nil, err
-	}
-	if len(tags) > 0 {
-		config.BaseImage = config.RepositoryName + ":" + tags[0]
 	}
 
 	return config, nil
