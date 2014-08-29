@@ -208,6 +208,8 @@ func assignYamlValues(yamlConf *yamlConfig, config *ProjectConfig) {
 
 			if len(yamlCmd.Cmd) > 0 {
 				cmd.Cmd = yamlCmd.Cmd
+			} else {
+				cmd.Cmd = []string{cmdName}
 			}
 
 			config.Commands[cmdName] = cmd

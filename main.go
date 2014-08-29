@@ -49,6 +49,10 @@ func loadConfig() *devstep.ProjectConfig {
 		os.Exit(1)
 	}
 
+	if devstep.LogLevel != "" {
+		config.Defaults.Env["DEVSTEP_LOG"] = devstep.LogLevel
+	}
+
 	return config
 }
 
@@ -66,7 +70,7 @@ func main() {
 	app.Usage = "development environments made easy"
 	app.Version = "0.1.0"
 	app.Flags = []cli.Flag{
-		cli.BoolFlag{Name: "debug, d", Usage: "debug mode"},
+		cli.StringFlag{Name: "log-level, l", Usage: "log level", EnvVar: "DEVSTEP_LOG"},
 	}
 	app.Commands = commands
 
@@ -77,7 +81,7 @@ var buildCmd = cli.Command{
 	Name:  "build",
 	Usage: "build a docker image for the current project",
 	Action: func(c *cli.Context) {
-		devstep.Verbose(c.GlobalBool("debug"))
+		devstep.SetLogLevel(c.GlobalString("log-level"))
 
 		err := newProject().Build(client)
 		if err != nil {
@@ -92,7 +96,7 @@ var hackCmd = cli.Command{
 	Usage: "start a hacking session for the current project",
 	Flags: dockerRunFlags,
 	Action: func(c *cli.Context) {
-		devstep.Verbose(c.GlobalBool("debug"))
+		devstep.SetLogLevel(c.GlobalString("log-level"))
 
 		runOpts := parseRunOpts(c)
 		err := newProject().Hack(client, runOpts)
@@ -108,7 +112,7 @@ var runCmd = cli.Command{
 	Usage: "Run a one off command against the current base image",
 	Flags: dockerRunFlags,
 	Action: func(c *cli.Context) {
-		devstep.Verbose(c.GlobalBool("debug"))
+		devstep.SetLogLevel(c.GlobalString("log-level"))
 
 		runOpts := parseRunOpts(c)
 		runOpts.Cmd = c.Args()
@@ -144,7 +148,7 @@ var cleanCmd = cli.Command{
 	Name:  "clean",
 	Usage: "remove previously built images for the current environment",
 	Action: func(c *cli.Context) {
-		devstep.Verbose(c.GlobalBool("debug"))
+		devstep.SetLogLevel(c.GlobalString("log-level"))
 
 		err := newProject().Clean(client)
 		if err != nil {
@@ -158,7 +162,8 @@ var infoCmd = cli.Command{
 	Name:  "info",
 	Usage: "show information about the current environment",
 	Action: func(c *cli.Context) {
-		devstep.Verbose(c.GlobalBool("debug"))
+		devstep.SetLogLevel(c.GlobalString("log-level"))
+
 		config := loadConfig()
 		fmt.Printf("\nConfig:\n\t%+v", config)
 		if config.Defaults != nil {
