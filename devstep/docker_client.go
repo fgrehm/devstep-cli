@@ -47,7 +47,7 @@ type dockerClient struct {
 func (c *dockerClient) Run(opts *DockerRunOpts) (*DockerRunResult, error) {
 	env := []string{}
 	for k, v := range opts.Env {
-		env = append(env, k + "='" + v + "'")
+		env = append(env, k+"='"+v+"'")
 	}
 
 	createOpts := docker.CreateContainerOptions{

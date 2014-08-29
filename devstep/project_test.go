@@ -38,16 +38,16 @@ func Test_Hack(t *testing.T) {
 
 func Test_HackUsesDockerConfigs(t *testing.T) {
 	project, err := devstep.NewProject(&devstep.ProjectConfig{
-		HostDir:   "/path/on/host",
-		GuestDir:  "/path/on/guest",
-		CacheDir:  "/cache/path/on/host",
-		Defaults:  &devstep.DockerRunOpts{
+		HostDir:  "/path/on/host",
+		GuestDir: "/path/on/guest",
+		CacheDir: "/cache/path/on/host",
+		Defaults: &devstep.DockerRunOpts{
 			Privileged: true,
-			Links:   []string{"some:link"},
-			Volumes: []string{"/some:/volume"},
-			Env:     map[string]string{"SOME": "ENV"},
+			Links:      []string{"some:link"},
+			Volumes:    []string{"/some:/volume"},
+			Env:        map[string]string{"SOME": "ENV"},
 		},
-		HackOpts:  &devstep.DockerRunOpts{
+		HackOpts: &devstep.DockerRunOpts{
 			Links:   []string{"other:link"},
 			Volumes: []string{"/other:/volume"},
 			Env:     map[string]string{"OTHER": "VALUE"},
@@ -138,20 +138,20 @@ func Test_Build(t *testing.T) {
 
 func Test_BuildUsesGlobalDockerConfigs(t *testing.T) {
 	project, err := devstep.NewProject(&devstep.ProjectConfig{
-		HostDir:   "/path/on/host",
-		GuestDir:  "/path/on/guest",
-		CacheDir:  "/cache/path/on/host",
-		Defaults:  &devstep.DockerRunOpts{
+		HostDir:  "/path/on/host",
+		GuestDir: "/path/on/guest",
+		CacheDir: "/cache/path/on/host",
+		Defaults: &devstep.DockerRunOpts{
 			Privileged: true,
-			Links:   []string{"some:link"},
-			Volumes: []string{"/some:/volume"},
-			Env:     map[string]string{"SOME": "ENV"},
+			Links:      []string{"some:link"},
+			Volumes:    []string{"/some:/volume"},
+			Env:        map[string]string{"SOME": "ENV"},
 		},
-		HackOpts:  &devstep.DockerRunOpts{
+		HackOpts: &devstep.DockerRunOpts{
 			Privileged: false,
-			Links:   []string{"other:link"},
-			Volumes: []string{"/other:/volume"},
-			Env:     map[string]string{"OTHER": "VALUE"},
+			Links:      []string{"other:link"},
+			Volumes:    []string{"/other:/volume"},
+			Env:        map[string]string{"OTHER": "VALUE"},
 		},
 	})
 	ok(t, err)

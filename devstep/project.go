@@ -45,8 +45,8 @@ func NewProject(config *ProjectConfig) (Project, error) {
 
 // Build the project and commit it to an image
 func (p *project) Build(client DockerClient) error {
-	volumes := append(p.Defaults.Volumes, p.HostDir + ":" + p.GuestDir)
-	volumes = append(volumes, p.CacheDir + ":/.devstep/cache")
+	volumes := append(p.Defaults.Volumes, p.HostDir+":"+p.GuestDir)
+	volumes = append(volumes, p.CacheDir+":/.devstep/cache")
 	links := p.Defaults.Links
 	env := make(map[string]string)
 	for k, v := range p.Defaults.Env {
@@ -105,8 +105,8 @@ func (p *project) Build(client DockerClient) error {
 // Starts a hacking session on the project
 func (p *project) Hack(client DockerClient) error {
 	volumes := append(p.Defaults.Volumes, p.HackOpts.Volumes...)
-	volumes = append(volumes, p.HostDir + ":" + p.GuestDir)
-	volumes = append(volumes, p.CacheDir + ":/.devstep/cache")
+	volumes = append(volumes, p.HostDir+":"+p.GuestDir)
+	volumes = append(volumes, p.CacheDir+":/.devstep/cache")
 
 	links := append(p.Defaults.Links, p.HackOpts.Links...)
 
