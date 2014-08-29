@@ -21,6 +21,11 @@ var commands = []cli.Command{
 	infoCmd,
 }
 
+var dockerRunFlags = []cli.Flag{
+	cli.StringSliceFlag{Name: "p, publish", Value: &cli.StringSlice{}, Usage: "Publish a container's port to the host"},
+	cli.StringSliceFlag{Name: "link", Value: &cli.StringSlice{}, Usage: "Add link to another container (name:alias)"},
+}
+
 func projectRoot() string {
 	pwd, err := os.Getwd()
 	if err != nil {
@@ -85,35 +90,11 @@ var buildCmd = cli.Command{
 var hackCmd = cli.Command{
 	Name:  "hack",
 	Usage: "start a hacking session for the current project",
-	Flags: []cli.Flag{
-		cli.StringSliceFlag{Name: "p, publish", Value: &cli.StringSlice{}, Usage: "Publish a container's port to the host"},
-		cli.StringSliceFlag{Name: "link", Value: &cli.StringSlice{}, Usage: "Add link to another container (name:alias)"},
-	},
+	Flags: dockerRunFlags,
 	Action: func(c *cli.Context) {
 		devstep.Verbose(c.GlobalBool("debug"))
 
-		runOpts := &devstep.DockerRunOpts{
-			Publish: c.StringSlice("publish"),
-			Links:   c.StringSlice("link"),
-		}
-
-		// Validate ports
-		validPort := regexp.MustCompile(`^\d+:\d+$`)
-		for _, port := range runOpts.Publish {
-			if !validPort.MatchString(port) {
-				fmt.Println("Invalid publish arg: " + port)
-				os.Exit(1)
-			}
-		}
-		// Validate links
-		validLink := regexp.MustCompile(`[^:]+:[^:]+`)
-		for _, link := range runOpts.Links {
-			if !validLink.MatchString(link) {
-				fmt.Println("Invalid link: " + link)
-				os.Exit(1)
-			}
-		}
-
+		runOpts := parseRunOpts(c)
 		err := newProject().Hack(client, runOpts)
 		if err != nil {
 			fmt.Println(err)
@@ -125,18 +106,12 @@ var hackCmd = cli.Command{
 var runCmd = cli.Command{
 	Name:  "run",
 	Usage: "Run a one off command against the current base image",
-	Flags: []cli.Flag{
-		cli.StringSliceFlag{Name: "p, publish", Value: &cli.StringSlice{}, Usage: "Publish a container's port to the host"},
-		cli.StringSliceFlag{Name: "link", Value: &cli.StringSlice{}, Usage: "Add link to another container (name:alias)"},
-	},
+	Flags: dockerRunFlags,
 	Action: func(c *cli.Context) {
 		devstep.Verbose(c.GlobalBool("debug"))
 
-		runOpts := &devstep.DockerRunOpts{
-			Cmd:     c.Args(),
-			Publish: c.StringSlice("publish"),
-			Links:   c.StringSlice("link"),
-		}
+		runOpts := parseRunOpts(c)
+		runOpts.Cmd = c.Args()
 
 		// Validate command
 		if len(runOpts.Cmd) == 0 {
@@ -148,23 +123,6 @@ var runCmd = cli.Command{
 		// Prepend a `--` so that it doesn't interfere with the current init
 		// process args
 		runOpts.Cmd = append([]string{"--"}, runOpts.Cmd...)
-
-		// Validate ports
-		validPort := regexp.MustCompile(`^\d+:\d+$`)
-		for _, port := range runOpts.Publish {
-			if !validPort.MatchString(port) {
-				fmt.Println("Invalid publish arg: " + port)
-				os.Exit(1)
-			}
-		}
-		// Validate links
-		validLink := regexp.MustCompile(`[^:]+:[^:]+`)
-		for _, link := range runOpts.Links {
-			if !validLink.MatchString(link) {
-				fmt.Println("Invalid link: " + link)
-				os.Exit(1)
-			}
-		}
 
 		err := newProject().Run(client, runOpts)
 		if err != nil {
@@ -202,4 +160,28 @@ var infoCmd = cli.Command{
 			fmt.Printf("%+v\n", config.HackOpts)
 		}
 	},
+}
+
+func parseRunOpts(c *cli.Context) *devstep.DockerRunOpts {
+	runOpts := &devstep.DockerRunOpts{
+		Publish: c.StringSlice("publish"),
+		Links:   c.StringSlice("link"),
+	}
+	// Validate ports
+	validPort := regexp.MustCompile(`^\d+:\d+$`)
+	for _, port := range runOpts.Publish {
+		if !validPort.MatchString(port) {
+			fmt.Println("Invalid publish arg: " + port)
+			os.Exit(1)
+		}
+	}
+	// Validate links
+	validLink := regexp.MustCompile(`[^:]+:[^:]+`)
+	for _, link := range runOpts.Links {
+		if !validLink.MatchString(link) {
+			fmt.Println("Invalid link: " + link)
+			os.Exit(1)
+		}
+	}
+	return runOpts
 }
