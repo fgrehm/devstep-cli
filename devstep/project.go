@@ -70,26 +70,13 @@ func (p *project) Build(client DockerClient) error {
 		return errors.New("Container exited with status != 0")
 	}
 
-	tag := "latest"
-	fmt.Printf("==> Commiting container to '%s:%s'\n", p.RepositoryName, tag)
-	err = client.Commit(&DockerCommitOpts{
-		ContainerID:    result.ContainerID,
-		RepositoryName: p.RepositoryName,
-		Tag:            tag,
-	})
-	if err != nil {
-		return errors.New("Error commiting container:\n  " + err.Error())
+	if err = p.commit(client, result.ContainerID, "latest"); err != nil {
+		return err
 	}
 
-	tag = time.Now().Local().Format("20060102150405")
-	fmt.Printf("==> Commiting container to '%s:%s'\n", p.RepositoryName, tag)
-	err = client.Commit(&DockerCommitOpts{
-		ContainerID:    result.ContainerID,
-		RepositoryName: p.RepositoryName,
-		Tag:            tag,
-	})
-	if err != nil {
-		return errors.New("Error commiting container:\n  " + err.Error())
+	tag := time.Now().Local().Format("20060102150405")
+	if err = p.commit(client, result.ContainerID, tag); err != nil {
+		return err
 	}
 
 	fmt.Println("==> Removing container used for build")
@@ -129,6 +116,20 @@ func (p *project) Clean(client DockerClient) error {
 		if err = client.RemoveImage(image); err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (p *project) commit(client DockerClient, containerID, tag string) error {
+	fmt.Printf("==> Commiting container to '%s:%s'\n", p.RepositoryName, tag)
+	err := client.Commit(&DockerCommitOpts{
+		ContainerID:    containerID,
+		RepositoryName: p.RepositoryName,
+		Tag:            tag,
+	})
+	if err != nil {
+		return errors.New("Error commiting container:\n  " + err.Error())
 	}
 
 	return nil
