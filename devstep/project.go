@@ -9,6 +9,7 @@ import (
 // The project interface provides access to the configuration, state and
 // lifecycle of a Project.
 type Project interface {
+	Config() *ProjectConfig
 	Build(DockerClient) error
 	Clean(DockerClient) error
 	Hack(DockerClient, *DockerRunOpts) error
@@ -17,14 +18,20 @@ type Project interface {
 
 // Project specific configuration, usually parsed from an yaml file
 type ProjectConfig struct {
-	SourceImage    string         // image used when starting environments from scratch
-	BaseImage      string         // starting point for the project
-	RepositoryName string         // name of the docker repository this project should be commited
-	HostDir        string         // root directory of the project on the host machine
-	GuestDir       string         // directory where the project sources will be mounted on the container
-	CacheDir       string         // a directory on the host machine were we can place downloaded packages
-	Defaults       *DockerRunOpts // default options passed on to docker for all commands
-	HackOpts       *DockerRunOpts // `devstep hack` specific options passed to the container
+	SourceImage    string                     // image used when starting environments from scratch
+	BaseImage      string                     // starting point for the project
+	RepositoryName string                     // name of the docker repository this project should be commited
+	HostDir        string                     // root directory of the project on the host machine
+	GuestDir       string                     // directory where the project sources will be mounted on the container
+	CacheDir       string                     // a directory on the host machine were we can place downloaded packages
+	Defaults       *DockerRunOpts             // default options passed on to docker for all commands
+	HackOpts       *DockerRunOpts             // `devstep hack` specific options passed to the container
+	Commands       map[string]*ProjectCommand // shortcut for commands
+}
+
+type ProjectCommand struct {
+	Name string
+	DockerRunOpts
 }
 
 // An implementation of a Project.
@@ -44,11 +51,15 @@ func NewProject(config *ProjectConfig) (Project, error) {
 	return project, nil
 }
 
+func (p *project) Config() *ProjectConfig {
+	return p.ProjectConfig
+}
+
 // Build the project and commit it to an image
 func (p *project) Build(client DockerClient) error {
 	fmt.Printf("==> Building project from '%s'\n", p.BaseImage)
 
-	opts := p.Defaults.merge(&DockerRunOpts{
+	opts := p.Defaults.Merge(&DockerRunOpts{
 		Image:      p.BaseImage,
 		AutoRemove: false,
 		Pty:        true,
@@ -86,7 +97,7 @@ func (p *project) Build(client DockerClient) error {
 
 // Starts a hacking session on the project
 func (p *project) Hack(client DockerClient, cliHackOpts *DockerRunOpts) error {
-	opts := p.Defaults.merge(p.HackOpts, cliHackOpts, &DockerRunOpts{
+	opts := p.Defaults.Merge(p.HackOpts, cliHackOpts, &DockerRunOpts{
 		Image:      p.BaseImage,
 		AutoRemove: true,
 		Pty:        true,
@@ -105,7 +116,7 @@ func (p *project) Hack(client DockerClient, cliHackOpts *DockerRunOpts) error {
 }
 
 func (p *project) Run(client DockerClient, cliRunOpts *DockerRunOpts) error {
-	opts := p.Defaults.merge(cliRunOpts, &DockerRunOpts{
+	opts := p.Defaults.Merge(cliRunOpts, &DockerRunOpts{
 		Image:      p.BaseImage,
 		AutoRemove: true,
 		Pty:        true,

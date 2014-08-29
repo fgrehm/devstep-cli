@@ -120,11 +120,19 @@ var runCmd = cli.Command{
 			os.Exit(1)
 		}
 
+		project := newProject()
+		commands := project.Config().Commands
+
+		if cmd, ok := commands[runOpts.Cmd[0]]; ok {
+			runOpts = cmd.Merge(runOpts)
+			runOpts.Cmd = append(cmd.Cmd, runOpts.Cmd[1:]...)
+		}
+
 		// Prepend a `--` so that it doesn't interfere with the current init
 		// process args
 		runOpts.Cmd = append([]string{"--"}, runOpts.Cmd...)
 
-		err := newProject().Run(client, runOpts)
+		err := project.Run(client, runOpts)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -152,12 +160,18 @@ var infoCmd = cli.Command{
 	Action: func(c *cli.Context) {
 		devstep.Verbose(c.GlobalBool("debug"))
 		config := loadConfig()
-		fmt.Printf("%+v\n", config)
+		fmt.Printf("\nConfig:\n\t%+v", config)
 		if config.Defaults != nil {
-			fmt.Printf("%+v\n", config.Defaults)
+			fmt.Printf("\n\nDefaults:\n\t%+v\n", config.Defaults)
 		}
 		if config.HackOpts != nil {
-			fmt.Printf("%+v\n", config.HackOpts)
+			fmt.Printf("\nHack:\n\t%+v\n", config.HackOpts)
+		}
+		if config.Commands != nil {
+			fmt.Println("\nCommands:")
+			for _, cmd := range config.Commands {
+				fmt.Printf("\t%s -> %+v\n", cmd.Name, cmd.DockerRunOpts)
+			}
 		}
 	},
 }

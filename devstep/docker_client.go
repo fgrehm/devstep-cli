@@ -146,7 +146,7 @@ func NewClient(endpoint string) DockerClient {
 	return &dockerClient{innerClient}
 }
 
-func (this DockerRunOpts) merge(others ...*DockerRunOpts) *DockerRunOpts {
+func (this DockerRunOpts) Merge(others ...*DockerRunOpts) *DockerRunOpts {
 	for _, other := range others {
 		if other == nil {
 			continue
@@ -179,7 +179,7 @@ func (this DockerRunOpts) merge(others ...*DockerRunOpts) *DockerRunOpts {
 func (opts *DockerRunOpts) toCreateOpts() docker.CreateContainerOptions {
 	env := []string{}
 	for k, v := range opts.Env {
-		env = append(env, k+"='"+v+"'")
+		env = append(env, k+"="+v)
 	}
 
 	exposedPorts := make(map[docker.Port]struct{})
