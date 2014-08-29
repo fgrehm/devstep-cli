@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/codegangsta/cli"
 	"github.com/fgrehm/devstep-cli/devstep"
+	"io/ioutil"
 	"os"
 	"regexp"
 )
@@ -17,6 +18,7 @@ var commands = []cli.Command{
 	buildCmd,
 	hackCmd,
 	runCmd,
+	binstubsCmd,
 	cleanCmd,
 	infoCmd,
 }
@@ -140,6 +142,35 @@ var runCmd = cli.Command{
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
+		}
+	},
+}
+
+var binstubsCmd = cli.Command{
+	Name:  "binstubs",
+	Usage: "Generate binstubs for the commands specified on devstep.yml",
+	Action: func(c *cli.Context) {
+		devstep.SetLogLevel(c.GlobalString("log-level"))
+
+		project := newProject()
+		commands := project.Config().Commands
+
+		if len(commands) == 0 {
+			fmt.Println("No binstubs specified!")
+			os.Exit(0)
+		}
+
+		binstubsPath := ".devstep/bin"
+		os.MkdirAll("./" + binstubsPath, 0700)
+
+		for _, cmd := range commands {
+			script := []byte("#!/usr/bin/env bash\neval \"devstep-cli run -- "+cmd.Name + " $@\"")
+			err := ioutil.WriteFile(binstubsPath + "/" + cmd.Name, script, 0755)
+			if err != nil {
+				fmt.Printf("Error creating binstub '%s'\n%s\n", binstubsPath + "/" + cmd.Name, err)
+				os.Exit(1)
+			}
+			fmt.Printf("Generated binstub for '%s' in '%s'\n", cmd.Name, binstubsPath)
 		}
 	},
 }
