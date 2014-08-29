@@ -5,6 +5,7 @@ import (
 	"github.com/codegangsta/cli"
 	"github.com/fgrehm/devstep-cli/devstep"
 	"os"
+	"regexp"
 )
 
 var (
@@ -83,10 +84,26 @@ var buildCmd = cli.Command{
 var hackCmd = cli.Command{
 	Name:  "hack",
 	Usage: "start a hacking session for the current project",
+	Flags: []cli.Flag{
+		cli.StringSliceFlag{Name: "p, publish", Value: &cli.StringSlice{}, Usage: "Publish a container's port to the host"},
+	},
 	Action: func(c *cli.Context) {
 		devstep.Verbose(c.GlobalBool("debug"))
 
-		err := newProject().Hack(client)
+		runOpts := &devstep.DockerRunOpts{
+			Publish: c.StringSlice("publish"),
+		}
+
+		// Validate ports
+		validPort := regexp.MustCompile(`\d+:\d+`)
+		for _, port := range runOpts.Publish {
+			if ! validPort.MatchString(port) {
+				fmt.Println("Invalid publish arg: " + port)
+				os.Exit(1)
+			}
+		}
+
+		err := newProject().Hack(client, runOpts)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

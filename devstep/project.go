@@ -11,7 +11,7 @@ import (
 type Project interface {
 	Build(DockerClient) error
 	Clean(DockerClient) error
-	Hack(DockerClient) error
+	Hack(DockerClient, *DockerRunOpts) error
 }
 
 // Project specific configuration, usually parsed from an yaml file
@@ -84,8 +84,8 @@ func (p *project) Build(client DockerClient) error {
 }
 
 // Starts a hacking session on the project
-func (p *project) Hack(client DockerClient) error {
-	opts := p.Defaults.merge(p.HackOpts, &DockerRunOpts{
+func (p *project) Hack(client DockerClient, cliHackOpts *DockerRunOpts) error {
+	opts := p.Defaults.merge(p.HackOpts, cliHackOpts, &DockerRunOpts{
 		Image:      p.BaseImage,
 		AutoRemove: true,
 		Pty:        true,

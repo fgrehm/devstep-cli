@@ -23,7 +23,7 @@ func Test_Hack(t *testing.T) {
 		return nil, nil
 	}
 
-	err = project.Hack(clientMock)
+	err = project.Hack(clientMock, nil)
 	ok(t, err)
 
 	equals(t, "repo/name:tag", runOpts.Image)
@@ -62,7 +62,7 @@ func Test_HackUsesDockerConfigs(t *testing.T) {
 		return nil, nil
 	}
 
-	err = project.Hack(clientMock)
+	err = project.Hack(clientMock, nil)
 	ok(t, err)
 
 	assert(t, runOpts.Privileged, "Privileged is false")

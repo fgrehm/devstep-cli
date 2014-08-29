@@ -28,6 +28,7 @@ type DockerRunOpts struct {
 	Links      []string
 	Image      string
 	Cmd        []string
+	Publish    []string
 }
 type DockerRunResult struct {
 	ContainerID string
@@ -147,6 +148,10 @@ func NewClient(endpoint string) DockerClient {
 
 func (this DockerRunOpts) merge(others ...*DockerRunOpts) *DockerRunOpts {
 	for _, other := range others {
+		if other == nil {
+			continue
+		}
+
 		if other.Image != "" {
 			this.Image = other.Image
 		}
@@ -161,6 +166,7 @@ func (this DockerRunOpts) merge(others ...*DockerRunOpts) *DockerRunOpts {
 			this.Workdir = other.Workdir
 		}
 
+		this.Publish = append(this.Publish, other.Publish...)
 		this.Volumes = append(this.Volumes, other.Volumes...)
 		this.Links = append(this.Links, other.Links...)
 		for k, v := range other.Env {
@@ -176,11 +182,18 @@ func (opts *DockerRunOpts) toCreateOpts() docker.CreateContainerOptions {
 		env = append(env, k+"='"+v+"'")
 	}
 
+	exposedPorts := make(map[docker.Port]struct{})
+	for _, port := range opts.Publish {
+		containerPort := strings.Split(port, ":")[1]
+		exposedPorts[docker.Port(containerPort)] = struct{}{}
+	}
+
 	return docker.CreateContainerOptions{
 		Config: &docker.Config{
 			Image:        opts.Image,
 			Cmd:          opts.Cmd,
 			Env:          env,
+			ExposedPorts: exposedPorts,
 			OpenStdin:    opts.Pty,
 			StdinOnce:    opts.Pty,
 			AttachStdin:  opts.Pty,
@@ -193,10 +206,21 @@ func (opts *DockerRunOpts) toCreateOpts() docker.CreateContainerOptions {
 }
 
 func (opts *DockerRunOpts) toHostConfig() *docker.HostConfig {
+	portBindings := make(map[docker.Port][]docker.PortBinding)
+	for _, port := range opts.Publish {
+		hostAndContainerPorts := strings.Split(port, ":")
+		hostPort := hostAndContainerPorts[0]
+		containerPort := docker.Port(hostAndContainerPorts[1])
+
+		bindings := portBindings[containerPort]
+		portBindings[containerPort] = append(bindings, docker.PortBinding{HostPort: hostPort})
+	}
+
 	return &docker.HostConfig{
-		Binds:      opts.Volumes,
-		Links:      opts.Links,
-		Privileged: opts.Privileged,
+		Binds:        opts.Volumes,
+		Links:        opts.Links,
+		Privileged:   opts.Privileged,
+		PortBindings: portBindings,
 	}
 }
 
