@@ -23,7 +23,10 @@ func Test_Hack(t *testing.T) {
 		return nil, nil
 	}
 
-	err = project.Hack(clientMock, nil)
+	err = project.Hack(clientMock, &devstep.DockerRunOpts{
+		Links:   []string{"foo:bar", "bar:foo"},
+		Publish: []string{"1:2", "3:4"},
+	})
 	ok(t, err)
 
 	equals(t, "repo/name:tag", runOpts.Image)
@@ -34,6 +37,12 @@ func Test_Hack(t *testing.T) {
 
 	assert(t, inArray("/path/on/host:/path/on/guest", runOpts.Volumes), "Project dir was not shared")
 	assert(t, inArray("/cache/path/on/host:/.devstep/cache", runOpts.Volumes), "Cache dir was not shared")
+
+	assert(t, inArray("foo:bar", runOpts.Links), "Link was not shared")
+	assert(t, inArray("bar:foo", runOpts.Links), "Link was not shared")
+
+	assert(t, inArray("1:2", runOpts.Publish), "CLI publish argument was not shared")
+	assert(t, inArray("3:4", runOpts.Publish), "CLI publish argument was not shared")
 }
 
 func Test_HackUsesDockerConfigs(t *testing.T) {

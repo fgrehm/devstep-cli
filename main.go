@@ -86,19 +86,29 @@ var hackCmd = cli.Command{
 	Usage: "start a hacking session for the current project",
 	Flags: []cli.Flag{
 		cli.StringSliceFlag{Name: "p, publish", Value: &cli.StringSlice{}, Usage: "Publish a container's port to the host"},
+		cli.StringSliceFlag{Name: "link", Value: &cli.StringSlice{}, Usage: "Add link to another container (name:alias)"},
 	},
 	Action: func(c *cli.Context) {
 		devstep.Verbose(c.GlobalBool("debug"))
 
 		runOpts := &devstep.DockerRunOpts{
 			Publish: c.StringSlice("publish"),
+			Links:   c.StringSlice("link"),
 		}
 
 		// Validate ports
-		validPort := regexp.MustCompile(`\d+:\d+`)
+		validPort := regexp.MustCompile(`^\d+:\d+$`)
 		for _, port := range runOpts.Publish {
-			if ! validPort.MatchString(port) {
+			if !validPort.MatchString(port) {
 				fmt.Println("Invalid publish arg: " + port)
+				os.Exit(1)
+			}
+		}
+		// Validate links
+		validLink := regexp.MustCompile(`[^:]+:[^:]+`)
+		for _, link := range runOpts.Links {
+			if !validLink.MatchString(link) {
+				fmt.Println("Invalid link: " + link)
 				os.Exit(1)
 			}
 		}
