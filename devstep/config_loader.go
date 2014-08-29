@@ -99,7 +99,8 @@ func (l *configLoader) Load() (*ProjectConfig, error) {
 }
 
 func (l *configLoader) buildDefaultConfig() (*ProjectConfig, error) {
-	repositoryName := "devstep/" + filepath.Base(l.projectRoot)
+	projectDirName := filepath.Base(l.projectRoot)
+	repositoryName := "devstep/" + projectDirName
 	config := &ProjectConfig{
 		SourceImage:    "fgrehm/devstep:v0.1.0",
 		BaseImage:      "fgrehm/devstep:v0.1.0",
@@ -107,9 +108,12 @@ func (l *configLoader) buildDefaultConfig() (*ProjectConfig, error) {
 		HostDir:        l.projectRoot,
 		GuestDir:       "/workspace",
 		CacheDir:       "/tmp/devstep/cache",
-		Defaults:       &DockerRunOpts{Env: make(map[string]string)},
-		HackOpts:       &DockerRunOpts{Env: make(map[string]string)},
-		Commands:       make(map[string]*ProjectCommand),
+		Defaults: &DockerRunOpts{
+			Env:      make(map[string]string),
+			Hostname: projectDirName,
+		},
+		HackOpts: &DockerRunOpts{Env: make(map[string]string)},
+		Commands: make(map[string]*ProjectCommand),
 	}
 
 	return config, nil

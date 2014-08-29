@@ -161,13 +161,13 @@ var binstubsCmd = cli.Command{
 		}
 
 		binstubsPath := ".devstep/bin"
-		os.MkdirAll("./" + binstubsPath, 0700)
+		os.MkdirAll("./"+binstubsPath, 0700)
 
 		for _, cmd := range commands {
-			script := []byte("#!/usr/bin/env bash\neval \"devstep-cli run -- "+cmd.Name + " $@\"")
-			err := ioutil.WriteFile(binstubsPath + "/" + cmd.Name, script, 0755)
+			script := []byte("#!/usr/bin/env bash\neval \"devstep-cli run -- " + cmd.Name + " $@\"")
+			err := ioutil.WriteFile(binstubsPath+"/"+cmd.Name, script, 0755)
 			if err != nil {
-				fmt.Printf("Error creating binstub '%s'\n%s\n", binstubsPath + "/" + cmd.Name, err)
+				fmt.Printf("Error creating binstub '%s'\n%s\n", binstubsPath+"/"+cmd.Name, err)
 				os.Exit(1)
 			}
 			fmt.Printf("Generated binstub for '%s' in '%s'\n", cmd.Name, binstubsPath)

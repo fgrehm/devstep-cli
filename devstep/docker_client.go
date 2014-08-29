@@ -22,6 +22,7 @@ type DockerRunOpts struct {
 	AutoRemove bool
 	Pty        bool
 	Workdir    string
+	Hostname   string
 	Privileged bool
 	Env        map[string]string
 	Volumes    []string
@@ -193,6 +194,7 @@ func (opts *DockerRunOpts) toCreateOpts() docker.CreateContainerOptions {
 			Image:        opts.Image,
 			Cmd:          opts.Cmd,
 			Env:          env,
+			Hostname:     opts.Hostname,
 			ExposedPorts: exposedPorts,
 			OpenStdin:    opts.Pty,
 			StdinOnce:    opts.Pty,
