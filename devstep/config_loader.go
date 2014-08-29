@@ -41,8 +41,6 @@ func NewConfigLoader(client DockerClient, homeDirectory, projectRoot string) Con
 
 func (l *configLoader) Load() (*ProjectConfig, error) {
 	log.Info("Loading configuration for %s", l.projectRoot)
-	// TODO: Load config from project directory
-	// TODO: Handle errors
 
 	config, err := l.buildDefaultConfig()
 	if err != nil {
@@ -70,7 +68,7 @@ func (l *configLoader) Load() (*ProjectConfig, error) {
 	}
 	if yamlConf != nil {
 		log.Info("Loaded config from project dir")
-		log.Debug("Home dir config: %+v", yamlConf)
+		log.Debug("Project dir config: %+v", yamlConf)
 		assignYamlValues(yamlConf, config)
 		config.Defaults.Privileged = yamlConf.Privileged
 	}

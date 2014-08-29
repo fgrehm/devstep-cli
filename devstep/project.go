@@ -45,27 +45,21 @@ func NewProject(config *ProjectConfig) (Project, error) {
 
 // Build the project and commit it to an image
 func (p *project) Build(client DockerClient) error {
-	volumes := append(p.Defaults.Volumes, p.HostDir+":"+p.GuestDir)
-	volumes = append(volumes, p.CacheDir+":/.devstep/cache")
-	links := p.Defaults.Links
-	env := make(map[string]string)
-	for k, v := range p.Defaults.Env {
-		env[k] = v
-	}
-
 	fmt.Printf("==> Building project from '%s'\n", p.BaseImage)
 
-	result, err := client.Run(&DockerRunOpts{
+	opts := p.Defaults.merge(&DockerRunOpts{
 		Image:      p.BaseImage,
 		AutoRemove: false,
 		Pty:        true,
 		Cmd:        []string{"/.devstep/bin/build-project", p.GuestDir},
-		Volumes:    volumes,
 		Workdir:    p.GuestDir,
-		Links:      links,
-		Env:        env,
-		Privileged: p.Defaults.Privileged,
+		Volumes: []string{
+			p.HostDir + ":" + p.GuestDir,
+			p.CacheDir + ":/.devstep/cache",
+		},
 	})
+
+	result, err := client.Run(opts)
 	log.Debug("Docker run result: %+v", result)
 
 	if err != nil {
@@ -104,33 +98,21 @@ func (p *project) Build(client DockerClient) error {
 
 // Starts a hacking session on the project
 func (p *project) Hack(client DockerClient) error {
-	volumes := append(p.Defaults.Volumes, p.HackOpts.Volumes...)
-	volumes = append(volumes, p.HostDir+":"+p.GuestDir)
-	volumes = append(volumes, p.CacheDir+":/.devstep/cache")
-
-	links := append(p.Defaults.Links, p.HackOpts.Links...)
-
-	env := make(map[string]string)
-	for k, v := range p.Defaults.Env {
-		env[k] = v
-	}
-	for k, v := range p.HackOpts.Env {
-		env[k] = v
-	}
-
-	fmt.Printf("==> Creating container using '%s'\n", p.BaseImage)
-
-	_, err := client.Run(&DockerRunOpts{
+	opts := p.Defaults.merge(p.HackOpts, &DockerRunOpts{
 		Image:      p.BaseImage,
 		AutoRemove: true,
 		Pty:        true,
 		Cmd:        []string{"/.devstep/bin/hack"},
-		Volumes:    volumes,
 		Workdir:    p.GuestDir,
-		Links:      links,
-		Env:        env,
-		Privileged: p.Defaults.Privileged,
+		Volumes: []string{
+			p.HostDir + ":" + p.GuestDir,
+			p.CacheDir + ":/.devstep/cache",
+		},
 	})
+
+	fmt.Printf("==> Creating container using '%s'\n", p.BaseImage)
+
+	_, err := client.Run(opts)
 	return err
 }
 

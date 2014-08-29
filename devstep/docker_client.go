@@ -179,3 +179,28 @@ func NewClient(endpoint string) DockerClient {
 	innerClient, _ := docker.NewClient(endpoint)
 	return &dockerClient{innerClient}
 }
+
+func (this DockerRunOpts) merge(others ...*DockerRunOpts) *DockerRunOpts {
+	for _, other := range others {
+		if other.Image != "" {
+			this.Image = other.Image
+		}
+		if len(other.Cmd) > 0 {
+			this.Cmd = other.Cmd
+		}
+
+		this.AutoRemove = other.AutoRemove
+		this.Pty = other.Pty
+
+		if other.Workdir != "" {
+			this.Workdir = other.Workdir
+		}
+
+		this.Volumes = append(this.Volumes, other.Volumes...)
+		this.Links = append(this.Links, other.Links...)
+		for k, v := range other.Env {
+			this.Env[k] = v
+		}
+	}
+	return &this
+}
