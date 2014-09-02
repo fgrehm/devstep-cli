@@ -222,20 +222,44 @@ var infoCmd = cli.Command{
 		devstep.SetLogLevel(c.GlobalString("log-level"))
 
 		config := loadConfig()
-		fmt.Printf("\nConfig:\n\t%+v", config)
-		if config.Defaults != nil {
-			fmt.Printf("\n\nDefaults:\n\t%+v\n", config.Defaults)
-		}
-		if config.HackOpts != nil {
-			fmt.Printf("\nHack:\n\t%+v\n", config.HackOpts)
-		}
-		if config.Commands != nil {
-			fmt.Println("\nCommands:")
-			for _, cmd := range config.Commands {
-				fmt.Printf("\t%s -> %+v\n", cmd.Name, cmd.DockerRunOpts)
-			}
-		}
+		printConfig(config)
 	},
+}
+
+func printConfig(config *devstep.ProjectConfig) {
+	fmt.Println("==> Project info")
+	fmt.Printf("Repository:   %s\n", config.RepositoryName)
+	fmt.Printf("Source image: %s\n", config.SourceImage)
+	fmt.Printf("Base image:   %s\n", config.BaseImage)
+	fmt.Printf("Host dir:     %s\n", config.HostDir)
+	fmt.Printf("Guest dir:    %s\n", config.GuestDir)
+	fmt.Printf("Cache dir:    %s\n", config.CacheDir)
+
+	if config.Defaults != nil {
+		fmt.Println("\n==> Default options:")
+		printDockerRunOpts(config.Defaults, "")
+	}
+
+	if config.HackOpts != nil {
+		fmt.Println("\n==> Hack options:")
+		printDockerRunOpts(config.HackOpts, "")
+	}
+	if config.Commands != nil {
+		fmt.Println("\n==> Commands:")
+		for _, cmd := range config.Commands {
+			fmt.Printf("* %s\n", cmd.Name)
+			fmt.Printf("  Cmd:        %v\n", cmd.Cmd)
+			fmt.Printf("  Publish:    %v\n", cmd.Publish)
+			printDockerRunOpts(&cmd.DockerRunOpts, "  ")
+		}
+	}
+}
+
+func printDockerRunOpts(opts *devstep.DockerRunOpts, prefix string) {
+	fmt.Printf("%sPrivileged: %v\n", prefix, opts.Privileged)
+	fmt.Printf("%sLinks:      %v\n", prefix, opts.Links)
+	fmt.Printf("%sVolumes:    %v\n", prefix, opts.Volumes)
+	fmt.Printf("%sEnv:        %v\n", prefix, opts.Env)
 }
 
 func parseRunOpts(c *cli.Context) *devstep.DockerRunOpts {
