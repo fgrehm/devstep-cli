@@ -75,6 +75,7 @@ func main() {
 	app.Email = "fgrehm@gmail.com"
 	app.Usage = "development environments made easy"
 	app.Version = "0.1.0"
+	app.EnableBashCompletion = true
 	app.Flags = []cli.Flag{
 		cli.StringFlag{Name: "log-level, l", Usage: "log level", EnvVar: "DEVSTEP_LOG"},
 	}
