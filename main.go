@@ -17,6 +17,7 @@ var (
 var commands = []cli.Command{
 	hackCmd,
 	buildCmd,
+	bootstrapCmd,
 	infoCmd,
 	runCmd,
 	binstubsCmd,
@@ -87,6 +88,20 @@ var buildCmd = cli.Command{
 		devstep.SetLogLevel(c.GlobalString("log-level"))
 
 		err := newProject().Build(client)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
+var bootstrapCmd = cli.Command{
+	Name:  "bootstrap",
+	Usage: "bootstrap an environment for the current project",
+	Action: func(c *cli.Context) {
+		devstep.SetLogLevel(c.GlobalString("log-level"))
+
+		err := newProject().Bootstrap(client)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

@@ -11,6 +11,7 @@ import (
 type Project interface {
 	Config() *ProjectConfig
 	Build(DockerClient) error
+	Bootstrap(DockerClient) error
 	Clean(DockerClient) error
 	Hack(DockerClient, *DockerRunOpts) error
 	Run(DockerClient, *DockerRunOpts) error
@@ -92,6 +93,46 @@ func (p *project) Build(client DockerClient) error {
 	}
 
 	fmt.Println("==> Removing container used for build")
+	return client.RemoveContainer(result.ContainerID)
+}
+
+// Start a hacking session and commit it to an image if all goes well
+func (p *project) Bootstrap(client DockerClient) error {
+	fmt.Printf("==> Creating container based on '%s'\n", p.BaseImage)
+
+	opts := p.Defaults.Merge(&DockerRunOpts{
+		Image:      p.BaseImage,
+		AutoRemove: false,
+		Pty:        true,
+		Cmd:        []string{"bash"},
+		Workdir:    p.GuestDir,
+		Volumes: []string{
+			p.HostDir + ":" + p.GuestDir,
+			p.CacheDir + ":/.devstep/cache",
+		},
+	})
+
+	result, err := client.Run(opts)
+	log.Debug("Docker run result: %+v", result)
+
+	if err != nil {
+		return err
+	}
+
+	if result.ExitCode != 0 {
+		return errors.New("Container exited with status != 0")
+	}
+
+	if err = p.commit(client, result.ContainerID, "latest"); err != nil {
+		return err
+	}
+
+	tag := time.Now().Local().Format("20060102150405")
+	if err = p.commit(client, result.ContainerID, tag); err != nil {
+		return err
+	}
+
+	fmt.Println("==> Removing container used for bootstrapping")
 	return client.RemoveContainer(result.ContainerID)
 }
 
