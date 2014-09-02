@@ -15,12 +15,13 @@ var (
 )
 
 var commands = []cli.Command{
-	buildCmd,
 	hackCmd,
+	buildCmd,
+	infoCmd,
 	runCmd,
 	binstubsCmd,
 	cleanCmd,
-	infoCmd,
+	pristineCmd,
 }
 
 var dockerRunFlags = []cli.Flag{
@@ -186,6 +187,16 @@ var cleanCmd = cli.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
+	},
+}
+
+var pristineCmd = cli.Command{
+	Name: "pristine",
+	Usage: "rebuild project image from scratch",
+	Action: func(c *cli.Context) {
+		// TODO: Figure out if this is the right way to invoke other CLI actions
+		cleanCmd.Action(c)
+		buildCmd.Action(c)
 	},
 }
 
