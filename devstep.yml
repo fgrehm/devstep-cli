@@ -1,0 +1,4 @@
+working_dir: '/.devstep/gocode/src/github.com/fgrehm/devstep-cli'
+privileged: true
+volumes:
+  - '{{env "HOME"}}/devstep-dockerroot:/var/lib/docker'
