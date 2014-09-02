@@ -44,7 +44,7 @@ func Test_DefaultsWithBlankValuesOnYaml(t *testing.T) {
 	assert(t, !config.Defaults.Privileged, "Privileged is set by default")
 }
 
-func Test_SourceImageGetsSetWhenRepositoryTagExists(t *testing.T) {
+func Test_BaseImageGetsSetWhenRepositoryTagExists(t *testing.T) {
 	loader, client := newConfigLoader("", "/path/to/a-project")
 
 	var repositoryNameSearched string
@@ -107,6 +107,7 @@ hack:
 	ok(t, err)
 
 	equals(t, "source/image:tag", config.SourceImage)
+	equals(t, "source/image:tag", config.BaseImage)
 	equals(t, "/custom/cache/dir", config.CacheDir)
 	equals(t, "/path/to/guest/dir", config.GuestDir)
 
@@ -139,6 +140,7 @@ cache_dir:    '{{env "BAR"}}/cache-dir'
 	ok(t, err)
 
 	equals(t, "foo-value/image:tag", config.SourceImage)
+	equals(t, "foo-value/image:tag", config.BaseImage)
 	equals(t, "bar-val/cache-dir", config.CacheDir)
 }
 
@@ -179,6 +181,7 @@ hack:
 
 	equals(t, "repo/name", config.RepositoryName)
 	equals(t, "source/image:tag", config.SourceImage)
+	equals(t, "source/image:tag", config.BaseImage)
 	equals(t, "/custom/cache/dir", config.CacheDir)
 	equals(t, "/path/to/guest/dir", config.GuestDir)
 	assert(t, config.Defaults.Privileged, "Privileged is not set")
@@ -256,6 +259,7 @@ hack:
 
 	equals(t, "repo/name", config.RepositoryName)
 	equals(t, "p-source/image:tag", config.SourceImage)
+	equals(t, "p-source/image:tag", config.BaseImage)
 	equals(t, "/p-custom/cache/dir", config.CacheDir)
 	equals(t, "/p-path/to/guest/dir", config.GuestDir)
 
@@ -288,6 +292,7 @@ cache_dir:    '{{env "BAR"}}/cache-dir'
 	ok(t, err)
 
 	equals(t, "foo-value/image:tag", config.SourceImage)
+	equals(t, "foo-value/image:tag", config.BaseImage)
 	equals(t, "bar-val/cache-dir", config.CacheDir)
 }
 

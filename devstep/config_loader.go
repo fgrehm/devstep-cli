@@ -90,6 +90,8 @@ func (l *configLoader) Load() (*ProjectConfig, error) {
 	}
 	if len(tags) > 0 {
 		config.BaseImage = config.RepositoryName + ":" + tags[0]
+	} else {
+		config.BaseImage = config.SourceImage
 	}
 
 	log.Info("Config loaded")
@@ -103,7 +105,6 @@ func (l *configLoader) buildDefaultConfig() (*ProjectConfig, error) {
 	repositoryName := "devstep/" + projectDirName
 	config := &ProjectConfig{
 		SourceImage:    "fgrehm/devstep:v0.1.0",
-		BaseImage:      "fgrehm/devstep:v0.1.0",
 		RepositoryName: repositoryName,
 		HostDir:        l.projectRoot,
 		GuestDir:       "/workspace",
