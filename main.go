@@ -1,12 +1,14 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/codegangsta/cli"
 	"github.com/fgrehm/devstep-cli/devstep"
 	"io/ioutil"
 	"os"
 	"regexp"
+	"strings"
 )
 
 var (
@@ -194,8 +196,27 @@ var binstubsCmd = cli.Command{
 var cleanCmd = cli.Command{
 	Name:  "clean",
 	Usage: "remove previously built images for the current environment",
+	Flags: []cli.Flag{
+		cli.BoolFlag{Name: "force, f", Usage: "skip confirmation"},
+	},
 	Action: func(c *cli.Context) {
 		devstep.SetLogLevel(c.GlobalString("log-level"))
+
+		if !c.Bool("force") {
+			fmt.Print("Are you sure? [N/y] ")
+
+			reader := bufio.NewReader(os.Stdin)
+			line, _, err := reader.ReadLine()
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+
+			if strings.ToUpper(string(line)) != "Y" {
+				fmt.Println("Aborting")
+				os.Exit(1)
+			}
+		}
 
 		err := newProject().Clean(client)
 		if err != nil {
@@ -208,6 +229,9 @@ var cleanCmd = cli.Command{
 var pristineCmd = cli.Command{
 	Name: "pristine",
 	Usage: "rebuild project image from scratch",
+	Flags: []cli.Flag{
+		cli.BoolFlag{Name: "force, f", Usage: "skip clean confirmation"},
+	},
 	Action: func(c *cli.Context) {
 		// TODO: Figure out if this is the right way to invoke other CLI actions
 		cleanCmd.Action(c)
