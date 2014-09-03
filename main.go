@@ -7,6 +7,7 @@ import (
 	"github.com/fgrehm/devstep-cli/devstep"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -53,6 +54,27 @@ func loadConfig() *devstep.ProjectConfig {
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
+	}
+
+	pluginsToLoad, err := filepath.Glob(homeDir() + "/devstep/plugins/*/plugin.js")
+	if err != nil {
+		fmt.Printf("Error searching for plugins under '%s'\n%s\n", homeDir(), err.Error())
+		os.Exit(1)
+	}
+
+	if len(pluginsToLoad) > 0 {
+		// fmt.Printf("Loading plugins from home dir: %+v\n", pluginsToLoad)
+		runtime := devstep.NewPluginRuntime(config)
+		for _, pluginPath := range(pluginsToLoad) {
+			file, err := os.Open(pluginPath)
+			if err != nil {
+				fmt.Printf("Error loading plugin '%s'\n%s\n", pluginPath, err.Error())
+				os.Exit(1)
+			}
+			runtime.Load(filepath.Dir(pluginPath), file)
+		}
+		// log.Info("Triggering plugins:configLoaded")
+		runtime.Trigger("configLoaded")
 	}
 
 	if devstep.LogLevel != "" {
