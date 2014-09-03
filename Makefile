@@ -1,8 +1,12 @@
-.PHONY: test build
+.PHONY: test build coverage ci ci-deps
 
 default: test
 
-ci: coverage build
+ci: ci-deps coverage build
+
+ci-deps:
+	go get -v github.com/axw/gocov/gocov
+	go get -v gopkg.in/matm/v1/gocov-html
 
 build: $(wildcard **/*.go)
 	@mkdir -p build
