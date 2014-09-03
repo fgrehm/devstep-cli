@@ -65,7 +65,7 @@ func loadConfig() *devstep.ProjectConfig {
 	if len(pluginsToLoad) > 0 {
 		// fmt.Printf("Loading plugins from home dir: %+v\n", pluginsToLoad)
 		runtime := devstep.NewPluginRuntime(config)
-		for _, pluginPath := range(pluginsToLoad) {
+		for _, pluginPath := range pluginsToLoad {
 			file, err := os.Open(pluginPath)
 			if err != nil {
 				fmt.Printf("Error loading plugin '%s'\n%s\n", pluginPath, err.Error())
@@ -250,7 +250,7 @@ var cleanCmd = cli.Command{
 }
 
 var pristineCmd = cli.Command{
-	Name: "pristine",
+	Name:  "pristine",
 	Usage: "rebuild project image from scratch",
 	Flags: []cli.Flag{
 		cli.BoolFlag{Name: "force, f", Usage: "skip clean confirmation"},

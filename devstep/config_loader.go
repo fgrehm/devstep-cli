@@ -201,7 +201,7 @@ func assignYamlValues(yamlConf *yamlConfig, config *ProjectConfig) {
 	if yamlConf.Commands != nil && len(yamlConf.Commands) > 0 {
 		for cmdName, yamlCmd := range yamlConf.Commands {
 			if yamlCmd == nil {
-				yamlCmd = &yamlCommand{};
+				yamlCmd = &yamlCommand{}
 			}
 
 			cmd := &ProjectCommand{
