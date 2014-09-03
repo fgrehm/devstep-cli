@@ -2,11 +2,7 @@
 
 default: test
 
-ci: ci-deps coverage build
-
-ci-deps:
-	go get -v github.com/axw/gocov/gocov
-	go get -v gopkg.in/matm/v1/gocov-html
+ci: test build
 
 build: $(wildcard **/*.go)
 	@mkdir -p build
