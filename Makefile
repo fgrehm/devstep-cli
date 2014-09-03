@@ -2,6 +2,8 @@
 
 default: test
 
+ci: coverage build
+
 build: $(wildcard **/*.go)
 	@mkdir -p build
 	go build -o build/devstep
