@@ -2,3 +2,8 @@ working_dir: '/.devstep/gocode/src/github.com/fgrehm/devstep-cli'
 privileged: true
 volumes:
   - '{{env "HOME"}}/devstep-dockerroot:/var/lib/docker'
+commands:
+  make:
+    # No custom options
+  watchf:
+    cmd: ["bash", "-c", "'rm -f .watchf.pid && watchf'"]

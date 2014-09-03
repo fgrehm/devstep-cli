@@ -216,6 +216,8 @@ func Test_BuildWithErrorOnRun(t *testing.T) {
 		return nil, runError
 	}
 
+	// TODO: Ensure the container gets removed
+
 	err = project.Build(clientMock)
 	equals(t, runError, err)
 }
@@ -252,6 +254,8 @@ func Test_BuildWithBadExitCode(t *testing.T) {
 	clientMock.RunFunc = func(o *devstep.DockerRunOpts) (*devstep.DockerRunResult, error) {
 		return &devstep.DockerRunResult{ExitCode: 1}, nil
 	}
+
+	// TODO: Ensure the container gets removed
 
 	err = project.Build(clientMock)
 	assert(t, err != nil, "Did not error")

@@ -4,7 +4,7 @@ default: test
 
 build: $(wildcard **/*.go)
 	@mkdir -p build
-	go build -v -o build/devstep
+	go build -o build/devstep
 
 test:
 	go test ./...

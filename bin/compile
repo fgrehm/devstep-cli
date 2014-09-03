@@ -9,11 +9,11 @@ go get gopkg.in/matm/v1/gocov-html
 go get github.com/parkghost/watchf
 
 echo 'Building CLI...'
-go build
+make build
 
 if ! [ -L /.devstep/bin/devstep ]; then
   echo 'Symlinking CLI'
-  ln -s `pwd`/devstep-cli $HOME/bin/devstep
+  ln -s `pwd`/build/devstep-cli $HOME/bin/devstep
 fi
 
 if ! [ -f /.devstep/bin/docker ]; then

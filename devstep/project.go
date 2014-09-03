@@ -76,10 +76,16 @@ func (p *project) Build(client DockerClient) error {
 	log.Debug("Docker run result: %+v", result)
 
 	if err != nil {
+		// TODO: Write test for this behavior
+		if result != nil && result.ContainerID != "" {
+			client.RemoveContainer(result.ContainerID)
+		}
 		return err
 	}
 
 	if result.ExitCode != 0 {
+		// TODO: Write test for this behavior
+		client.RemoveContainer(result.ContainerID)
 		return errors.New("Container exited with status != 0")
 	}
 
@@ -116,10 +122,16 @@ func (p *project) Bootstrap(client DockerClient) error {
 	log.Debug("Docker run result: %+v", result)
 
 	if err != nil {
+		// TODO: Write test for this behavior
+		if result != nil && result.ContainerID != "" {
+			client.RemoveContainer(result.ContainerID)
+		}
 		return err
 	}
 
 	if result.ExitCode != 0 {
+		// TODO: Write test for this behavior
+		client.RemoveContainer(result.ContainerID)
 		return errors.New("Container exited with status != 0")
 	}
 
