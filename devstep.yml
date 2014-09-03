@@ -3,6 +3,8 @@ privileged: true
 volumes:
   - '{{env "HOME"}}/devstep-dockerroot:/var/lib/docker'
 commands:
+  go:
+    # No custom options
   make:
     # No custom options
   watchf:
