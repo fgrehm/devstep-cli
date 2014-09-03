@@ -1,8 +1,11 @@
-.PHONY: test build coverage ci ci-deps
+.PHONY: test build coverage ci deps
 
 default: test
 
-ci: test build
+ci: deps test build
+
+deps:
+	go get ./...
 
 build: $(wildcard **/*.go)
 	@mkdir -p build
