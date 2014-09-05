@@ -4,21 +4,14 @@ set -e
 
 source $HOME/load-env.sh
 
-go get github.com/axw/gocov/gocov
-go get gopkg.in/matm/v1/gocov-html
-go get github.com/parkghost/watchf
+echo 'Fetching utilities...'
+go get -v github.com/axw/gocov/gocov
+go get -v gopkg.in/matm/v1/gocov-html
+go get -v github.com/parkghost/watchf
 
-echo 'Building CLI...'
 make build
 
 if ! [ -L /.devstep/bin/devstep ]; then
   echo 'Symlinking CLI'
-  ln -s `pwd`/build/devstep-cli $HOME/bin/devstep
-fi
-
-if ! [ -f /.devstep/bin/docker ]; then
-  configure-addons docker
-  docker pull fgrehm/devstep:v0.1.0
-else
-  echo 'Docker has already been installed, skipping'
+  ln -s `pwd`/build/devstep $HOME/bin/devstep
 fi

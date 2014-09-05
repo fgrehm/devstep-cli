@@ -68,15 +68,7 @@ func (c *dockerClient) Run(opts *DockerRunOpts) (*DockerRunResult, error) {
 		log.Info("Starting container with pseudo terminal")
 		err = dockerpty.Start(c.client, container, hostConfig)
 	} else {
-		err = c.client.StartContainer(container.ID, hostConfig)
-
-		if err == nil {
-			// Attach to the container
-			attachOpts := opts.toAttachOpts(container.ID)
-			log.Info("Attaching to container '%s'", container.ID)
-			log.Debug("Attach options: %+v", attachOpts)
-			err = c.client.AttachToContainer(attachOpts)
-		}
+		return nil, errors.New("Starting containers without Pty was not needed until this moment :)")
 	}
 	if err != nil {
 		return nil, errors.New("Error starting container:\n  " + err.Error())

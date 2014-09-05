@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bitbucket.org/kardianos/osext"
 	"bufio"
 	"fmt"
 	"github.com/codegangsta/cli"
@@ -138,6 +139,14 @@ var hackCmd = cli.Command{
 	Name:  "hack",
 	Usage: "start a hacking session for the current project",
 	Flags: dockerRunFlags,
+	BashComplete: func(c *cli.Context) {
+		args := c.Args()
+		if len(args) == 0 {
+			fmt.Println("-p")
+			fmt.Println("--publish")
+			fmt.Println("--link")
+		}
+	},
 	Action: func(c *cli.Context) {
 		devstep.SetLogLevel(c.GlobalString("log-level"))
 
@@ -204,8 +213,10 @@ var binstubsCmd = cli.Command{
 		binstubsPath := ".devstep/bin"
 		os.MkdirAll("./"+binstubsPath, 0700)
 
+		executable, _ := osext.Executable()
+
 		for _, cmd := range commands {
-			script := []byte("#!/usr/bin/env bash\neval \"devstep-cli run -- " + cmd.Name + " $@\"")
+			script := []byte("#!/usr/bin/env bash\neval \"" + executable + " run -- " + cmd.Name + " $@\"")
 			err := ioutil.WriteFile(binstubsPath+"/"+cmd.Name, script, 0755)
 			if err != nil {
 				fmt.Printf("Error creating binstub '%s'\n%s\n", binstubsPath+"/"+cmd.Name, err)
