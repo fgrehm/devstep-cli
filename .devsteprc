@@ -1,5 +1,0 @@
-DEVSTEP_RUN_OPTS="${DEVSTEP_RUN_OPTS} -v `pwd`:/.devstep/gocode/src/github.com/fgrehm/devstep-cli"
-DEVSTEP_RUN_OPTS="${DEVSTEP_RUN_OPTS} -v $HOME/devstep-dockerroot:/var/lib/docker"
-DEVSTEP_RUN_OPTS="${DEVSTEP_RUN_OPTS} --privileged"
-DEVSTEP_RUN_OPTS="${DEVSTEP_RUN_OPTS} -h 'devstep-cli'"
-DEVSTEP_RUN_OPTS="${DEVSTEP_RUN_OPTS} -w /.devstep/gocode/src/github.com/fgrehm/devstep-cli"
