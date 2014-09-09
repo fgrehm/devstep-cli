@@ -104,7 +104,7 @@ func (l *configLoader) buildDefaultConfig() (*ProjectConfig, error) {
 	projectDirName := filepath.Base(l.projectRoot)
 	repositoryName := "devstep/" + projectDirName
 	config := &ProjectConfig{
-		SourceImage:    "fgrehm/devstep:v0.1.0",
+		SourceImage:    "fgrehm/devstep:v0.2.0",
 		RepositoryName: repositoryName,
 		HostDir:        l.projectRoot,
 		GuestDir:       "/workspace",
