@@ -29,25 +29,41 @@ var commands = []cli.Command{
 	pristineCmd,
 }
 
+func main() {
+	app := cli.NewApp()
+	app.Name = "devstep"
+	app.Author = "Fábio Rehm"
+	app.Email = "fgrehm@gmail.com"
+	app.Usage = "development environments made easy"
+	app.Version = "0.1.0"
+	app.EnableBashCompletion = true
+	app.Flags = []cli.Flag{
+		cli.StringFlag{Name: "log-level, l", Usage: "log level", EnvVar: "DEVSTEP_LOG"},
+	}
+	app.Before = func(c *cli.Context) error {
+		return devstep.SetLogLevel(c.GlobalString("log-level"))
+	}
+	app.Commands = commands
+
+	app.RunAndExitOnError()
+}
+
 var dockerRunFlags = []cli.Flag{
 	cli.StringSliceFlag{Name: "p, publish", Value: &cli.StringSlice{}, Usage: "Publish a container's port to the host (hostPort:containerPort)"},
 	cli.StringSliceFlag{Name: "link", Value: &cli.StringSlice{}, Usage: "Add link to another container (name:alias)"},
 	cli.StringSliceFlag{Name: "e, env", Value: &cli.StringSlice{}, Usage: "Set environment variables"},
 }
 
-func projectRoot() string {
-	pwd, err := os.Getwd()
+func loadConfig() *devstep.ProjectConfig {
+	projectRoot, err := os.Getwd()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	return pwd
-}
 
-func loadConfig() *devstep.ProjectConfig {
 	homeDir := os.Getenv("HOME")
 	client = devstep.NewClient("unix:///var/run/docker.sock")
-	loader := devstep.NewConfigLoader(client, homeDir, projectRoot())
+	loader := devstep.NewConfigLoader(client, homeDir, projectRoot)
 
 	config, err := loader.Load()
 	if err != nil {
@@ -80,25 +96,6 @@ func newProject() devstep.Project {
 	config := loadConfig()
 	project, _ = devstep.NewProject(config)
 	return project
-}
-
-func main() {
-	app := cli.NewApp()
-	app.Name = "devstep"
-	app.Author = "Fábio Rehm"
-	app.Email = "fgrehm@gmail.com"
-	app.Usage = "development environments made easy"
-	app.Version = "0.1.0"
-	app.EnableBashCompletion = true
-	app.Flags = []cli.Flag{
-		cli.StringFlag{Name: "log-level, l", Usage: "log level", EnvVar: "DEVSTEP_LOG"},
-	}
-	app.Before = func(c *cli.Context) error {
-		return devstep.SetLogLevel(c.GlobalString("log-level"))
-	}
-	app.Commands = commands
-
-	app.RunAndExitOnError()
 }
 
 var buildCmd = cli.Command{
