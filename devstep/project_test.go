@@ -46,7 +46,11 @@ func Test_Hack(t *testing.T) {
 }
 
 func Test_HackUsesDockerConfigs(t *testing.T) {
-	var privileged *bool; { t := true; privileged = &t }
+	var privileged *bool
+	{
+		t := true
+		privileged = &t
+	}
 
 	project, err := devstep.NewProject(&devstep.ProjectConfig{
 		HostDir:  "/path/on/host",
@@ -148,8 +152,16 @@ func Test_Build(t *testing.T) {
 }
 
 func Test_BuildUsesGlobalDockerConfigs(t *testing.T) {
-	var privilegedTrue *bool; { t := true; privilegedTrue = &t }
-	var privilegedFalse *bool; { f := false; privilegedFalse = &f }
+	var privilegedTrue *bool
+	{
+		t := true
+		privilegedTrue = &t
+	}
+	var privilegedFalse *bool
+	{
+		f := false
+		privilegedFalse = &f
+	}
 
 	project, err := devstep.NewProject(&devstep.ProjectConfig{
 		HostDir:  "/path/on/host",
