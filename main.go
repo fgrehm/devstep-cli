@@ -44,13 +44,10 @@ func projectRoot() string {
 	return pwd
 }
 
-func homeDir() string {
-	return os.Getenv("HOME")
-}
-
 func loadConfig() *devstep.ProjectConfig {
+	homeDir := os.Getenv("HOME")
 	client = devstep.NewClient("unix:///var/run/docker.sock")
-	loader := devstep.NewConfigLoader(client, homeDir(), projectRoot())
+	loader := devstep.NewConfigLoader(client, homeDir, projectRoot())
 
 	config, err := loader.Load()
 	if err != nil {
@@ -58,9 +55,9 @@ func loadConfig() *devstep.ProjectConfig {
 		os.Exit(1)
 	}
 
-	pluginsToLoad, err := filepath.Glob(homeDir() + "/devstep/plugins/*/plugin.js")
+	pluginsToLoad, err := filepath.Glob(homeDir + "/devstep/plugins/*/plugin.js")
 	if err != nil {
-		fmt.Printf("Error searching for plugins under '%s'\n%s\n", homeDir(), err.Error())
+		fmt.Printf("Error searching for plugins under '%s'\n%s\n", homeDir, err.Error())
 		os.Exit(1)
 	}
 
@@ -174,7 +171,7 @@ var runCmd = cli.Command{
 
 		// Validate command
 		if len(runOpts.Cmd) == 0 {
-			fmt.Println("No command provided to `devstep run`\n")
+			fmt.Printf("No command provided to `devstep run`\n\n")
 			cli.ShowCommandHelp(c, "run")
 			os.Exit(1)
 		}
