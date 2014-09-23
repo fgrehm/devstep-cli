@@ -2,12 +2,13 @@ package devstep
 
 import (
 	"github.com/robertkrimen/otto"
-	"io"
+	"os"
+	"path/filepath"
 )
 
 type PluginRuntime interface {
 	Trigger(eventName string) error
-	Load(plugingPath string, src io.Reader) error
+	Load(pluginPath string) error
 }
 
 type pluginRuntime struct {
@@ -45,12 +46,20 @@ func NewPluginRuntime(projectCfg *ProjectConfig) PluginRuntime {
 }
 
 func (r *pluginRuntime) Trigger(eventName string) error {
+	log.Info("Triggering '" + eventName + "' plugin event")
 	_, err := r.vm.Run("devstep.trigger('" + eventName + "')")
 	return err
 }
 
-func (r *pluginRuntime) Load(pluginPath string, src io.Reader) error {
-	err := r.vm.Set("_currentPluginPath", pluginPath)
+func (r *pluginRuntime) Load(pluginPath string) error {
+	log.Info("Loading '" + pluginPath + "' plugin")
+
+	src, err := os.Open(pluginPath)
+	if err != nil {
+		panic("Error loading plugin '" + pluginPath + "'\n " + err.Error())
+	}
+
+	err = r.vm.Set("_currentPluginPath", filepath.Dir(pluginPath))
 	if err != nil {
 		panic("Error setting current plugin path _DEVSTEP_ADD_VOLUME\n " + err.Error())
 	}

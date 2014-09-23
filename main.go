@@ -62,17 +62,10 @@ func loadConfig() *devstep.ProjectConfig {
 	}
 
 	if len(pluginsToLoad) > 0 {
-		// fmt.Printf("Loading plugins from home dir: %+v\n", pluginsToLoad)
 		runtime := devstep.NewPluginRuntime(config)
 		for _, pluginPath := range pluginsToLoad {
-			file, err := os.Open(pluginPath)
-			if err != nil {
-				fmt.Printf("Error loading plugin '%s'\n%s\n", pluginPath, err.Error())
-				os.Exit(1)
-			}
-			runtime.Load(filepath.Dir(pluginPath), file)
+			runtime.Load(pluginPath)
 		}
-		// log.Info("Triggering plugins:configLoaded")
 		runtime.Trigger("configLoaded")
 	}
 
