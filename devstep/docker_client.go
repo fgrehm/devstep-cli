@@ -23,7 +23,7 @@ type DockerRunOpts struct {
 	Pty        bool
 	Workdir    string
 	Hostname   string
-	Privileged bool
+	Privileged *bool
 	Env        map[string]string
 	Volumes    []string
 	Links      []string
@@ -159,6 +159,10 @@ func (this DockerRunOpts) Merge(others ...*DockerRunOpts) *DockerRunOpts {
 			this.Workdir = other.Workdir
 		}
 
+		if other.Privileged != nil {
+			this.Privileged = other.Privileged
+		}
+
 		this.Publish = append(this.Publish, other.Publish...)
 		this.Volumes = append(this.Volumes, other.Volumes...)
 		this.Links = append(this.Links, other.Links...)
@@ -210,10 +214,15 @@ func (opts *DockerRunOpts) toHostConfig() *docker.HostConfig {
 		portBindings[containerPort] = append(bindings, docker.PortBinding{HostPort: hostPort})
 	}
 
+	privileged := false
+	if opts.Privileged != nil {
+		privileged = *opts.Privileged
+	}
+
 	return &docker.HostConfig{
 		Binds:        opts.Volumes,
 		Links:        opts.Links,
-		Privileged:   opts.Privileged,
+		Privileged:   privileged,
 		PortBindings: portBindings,
 	}
 }

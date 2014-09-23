@@ -20,11 +20,11 @@ type configLoader struct {
 }
 
 type yamlConfig struct {
-	RepositoryName string                  `yaml:"repository"`
-	SourceImage    string                  `yaml:"source_image"`
-	CacheDir       string                  `yaml:"cache_dir"`
-	GuestDir       string                  `yaml:"working_dir"`
-	Privileged     bool                    `yaml:"privileged"`
+	RepositoryName *string                 `yaml:"repository"`
+	SourceImage    *string                 `yaml:"source_image"`
+	CacheDir       *string                 `yaml:"cache_dir"`
+	GuestDir       *string                 `yaml:"working_dir"`
+	Privileged     *bool                   `yaml:"privileged"`
 	Links          []string                `yaml:"links"`
 	Volumes        []string                `yaml:"volumes"`
 	Env            map[string]string       `yaml:"environment"`
@@ -33,9 +33,9 @@ type yamlConfig struct {
 }
 
 type yamlCommand struct {
-	Name       string            `yaml:"name"`
+	Name       *string           `yaml:"name"`
 	Cmd        []string          `yaml:"cmd"`
-	Privileged bool              `yaml:"privileged"`
+	Privileged *bool             `yaml:"privileged"`
 	Links      []string          `yaml:"links"`
 	Volumes    []string          `yaml:"volumes"`
 	Publish    []string          `yaml:"publish"`
@@ -65,10 +65,10 @@ func (l *configLoader) Load() (*ProjectConfig, error) {
 	if yamlConf != nil {
 		log.Info("Loaded config from home dir")
 		log.Debug("Home dir config: %+v", yamlConf)
-		if yamlConf.RepositoryName != "" {
+		if yamlConf.RepositoryName != nil {
 			return nil, errors.New("Repository name can't be set globally")
 		}
-		if yamlConf.Privileged {
+		if yamlConf.Privileged != nil {
 			return nil, errors.New("Privileged name can't be set globally")
 		}
 		assignYamlValues(yamlConf, config)
@@ -81,7 +81,9 @@ func (l *configLoader) Load() (*ProjectConfig, error) {
 		log.Info("Loaded config from project dir")
 		log.Debug("Project dir config: %+v", yamlConf)
 		assignYamlValues(yamlConf, config)
-		config.Defaults.Privileged = yamlConf.Privileged
+		if yamlConf.Privileged != nil {
+			config.Defaults.Privileged = yamlConf.Privileged
+		}
 	}
 
 	tags, err := l.client.ListTags(config.RepositoryName)
@@ -160,17 +162,17 @@ func parseYaml(configPath string) (*yamlConfig, error) {
 }
 
 func assignYamlValues(yamlConf *yamlConfig, config *ProjectConfig) {
-	if yamlConf.RepositoryName != "" {
-		config.RepositoryName = yamlConf.RepositoryName
+	if yamlConf.RepositoryName != nil {
+		config.RepositoryName = *yamlConf.RepositoryName
 	}
-	if yamlConf.SourceImage != "" {
-		config.SourceImage = yamlConf.SourceImage
+	if yamlConf.SourceImage != nil {
+		config.SourceImage = *yamlConf.SourceImage
 	}
-	if yamlConf.CacheDir != "" {
-		config.CacheDir = yamlConf.CacheDir
+	if yamlConf.CacheDir != nil {
+		config.CacheDir = *yamlConf.CacheDir
 	}
-	if yamlConf.GuestDir != "" {
-		config.GuestDir = yamlConf.GuestDir
+	if yamlConf.GuestDir != nil {
+		config.GuestDir = *yamlConf.GuestDir
 	}
 	if yamlConf.Links != nil {
 		config.Defaults.Links = append(config.Defaults.Links, yamlConf.Links...)
@@ -207,12 +209,15 @@ func assignYamlValues(yamlConf *yamlConfig, config *ProjectConfig) {
 			cmd := &ProjectCommand{
 				cmdName,
 				DockerRunOpts{
-					Privileged: yamlCmd.Privileged,
-					Links:      yamlCmd.Links,
-					Volumes:    yamlCmd.Volumes,
-					Env:        yamlCmd.Env,
-					Publish:    yamlCmd.Publish,
+					Links:   yamlCmd.Links,
+					Volumes: yamlCmd.Volumes,
+					Env:     yamlCmd.Env,
+					Publish: yamlCmd.Publish,
 				},
+			}
+
+			if yamlCmd.Privileged != nil {
+				cmd.Privileged = yamlCmd.Privileged
 			}
 
 			if len(yamlCmd.Cmd) > 0 {

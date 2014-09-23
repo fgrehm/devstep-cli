@@ -53,6 +53,7 @@ var dockerRunFlags = []cli.Flag{
 	cli.StringSliceFlag{Name: "p, publish", Value: &cli.StringSlice{}, Usage: "Publish a container's port to the host (hostPort:containerPort)"},
 	cli.StringSliceFlag{Name: "link", Value: &cli.StringSlice{}, Usage: "Add link to another container (name:alias)"},
 	cli.StringSliceFlag{Name: "e, env", Value: &cli.StringSlice{}, Usage: "Set environment variables"},
+	cli.BoolFlag{Name: "privileged", Usage: "Give extended privileges to this container"},
 }
 
 func loadConfig() *devstep.ProjectConfig {
@@ -137,6 +138,7 @@ var hackCmd = cli.Command{
 			fmt.Println("--working_dir")
 			fmt.Println("-e")
 			fmt.Println("--env")
+			fmt.Println("--privileged")
 		}
 	},
 	Action: func(c *cli.Context) {
@@ -308,6 +310,12 @@ func parseRunOpts(c *cli.Context) *devstep.DockerRunOpts {
 		Publish: c.StringSlice("publish"),
 		Links:   c.StringSlice("link"),
 		Env:     make(map[string]string),
+	}
+
+	// Only set the privileged config if it was provided
+	if c.IsSet("privileged") {
+		privileged := c.Bool("privileged")
+		runOpts.Privileged = &privileged
 	}
 
 	// Set working dir directly on the project object so that it get passed
