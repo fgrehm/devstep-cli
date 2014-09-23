@@ -2,10 +2,10 @@ package main
 
 import (
 	"bitbucket.org/kardianos/osext"
-	"bufio"
 	"fmt"
 	"github.com/codegangsta/cli"
 	"github.com/fgrehm/devstep-cli/devstep"
+	"github.com/segmentio/go-prompt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -224,16 +224,7 @@ var cleanCmd = cli.Command{
 	},
 	Action: func(c *cli.Context) {
 		if !c.Bool("force") {
-			fmt.Print("Are you sure? [N/y] ")
-
-			reader := bufio.NewReader(os.Stdin)
-			line, _, err := reader.ReadLine()
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
-
-			if strings.ToUpper(string(line)) != "Y" {
+			if ok := prompt.Confirm("Are you sure? [N/y] "); !ok {
 				fmt.Println("Aborting")
 				os.Exit(1)
 			}
