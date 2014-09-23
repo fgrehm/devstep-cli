@@ -14,6 +14,10 @@ func init() {
 }
 
 func SetLogLevel(level string) error {
+	if level == "" {
+		return nil
+	}
+
 	if err := log.SetLevelString(level); err != nil {
 		return err
 	} else {
