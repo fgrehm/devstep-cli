@@ -30,7 +30,7 @@ var commands = []cli.Command{
 }
 
 var dockerRunFlags = []cli.Flag{
-	cli.StringSliceFlag{Name: "p, publish", Value: &cli.StringSlice{}, Usage: "Publish a container's port to the host"},
+	cli.StringSliceFlag{Name: "p, publish", Value: &cli.StringSlice{}, Usage: "Publish a container's port to the host (hostPort:containerPort)"},
 	cli.StringSliceFlag{Name: "link", Value: &cli.StringSlice{}, Usage: "Add link to another container (name:alias)"},
 }
 
