@@ -49,6 +49,7 @@ func main() {
 }
 
 var dockerRunFlags = []cli.Flag{
+	cli.StringFlag{Name: "w, working_dir", Usage: "Working directory inside the container"},
 	cli.StringSliceFlag{Name: "p, publish", Value: &cli.StringSlice{}, Usage: "Publish a container's port to the host (hostPort:containerPort)"},
 	cli.StringSliceFlag{Name: "link", Value: &cli.StringSlice{}, Usage: "Add link to another container (name:alias)"},
 	cli.StringSliceFlag{Name: "e, env", Value: &cli.StringSlice{}, Usage: "Set environment variables"},
@@ -132,13 +133,16 @@ var hackCmd = cli.Command{
 			fmt.Println("-p")
 			fmt.Println("--publish")
 			fmt.Println("--link")
+			fmt.Println("-w")
+			fmt.Println("--working_dir")
 			fmt.Println("-e")
 			fmt.Println("--env")
 		}
 	},
 	Action: func(c *cli.Context) {
+		project := newProject()
 		runOpts := parseRunOpts(c)
-		err := newProject().Hack(client, runOpts)
+		err := project.Hack(client, runOpts)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -151,6 +155,9 @@ var runCmd = cli.Command{
 	Usage: "Run a one off command against the current base image",
 	Flags: dockerRunFlags,
 	Action: func(c *cli.Context) {
+		project := newProject()
+		commands := project.Config().Commands
+
 		runOpts := parseRunOpts(c)
 		runOpts.Cmd = c.Args()
 
@@ -160,9 +167,6 @@ var runCmd = cli.Command{
 			cli.ShowCommandHelp(c, "run")
 			os.Exit(1)
 		}
-
-		project := newProject()
-		commands := project.Config().Commands
 
 		if cmd, ok := commands[runOpts.Cmd[0]]; ok {
 			runOpts = cmd.Merge(runOpts)
@@ -304,6 +308,12 @@ func parseRunOpts(c *cli.Context) *devstep.DockerRunOpts {
 		Publish: c.StringSlice("publish"),
 		Links:   c.StringSlice("link"),
 		Env:     make(map[string]string),
+	}
+
+	// Set working dir directly on the project object so that it get passed
+	// along properly
+	if workingDir := c.String("working_dir"); workingDir != "" {
+		project.Config().GuestDir = workingDir
 	}
 
 	// Env vars
