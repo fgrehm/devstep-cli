@@ -32,6 +32,7 @@ var commands = []cli.Command{
 var dockerRunFlags = []cli.Flag{
 	cli.StringSliceFlag{Name: "p, publish", Value: &cli.StringSlice{}, Usage: "Publish a container's port to the host (hostPort:containerPort)"},
 	cli.StringSliceFlag{Name: "link", Value: &cli.StringSlice{}, Usage: "Add link to another container (name:alias)"},
+	cli.StringSliceFlag{Name: "e, env", Value: &cli.StringSlice{}, Usage: "Set environment variables"},
 }
 
 func projectRoot() string {
@@ -145,6 +146,8 @@ var hackCmd = cli.Command{
 			fmt.Println("-p")
 			fmt.Println("--publish")
 			fmt.Println("--link")
+			fmt.Println("-e")
+			fmt.Println("--env")
 		}
 	},
 	Action: func(c *cli.Context) {
@@ -324,7 +327,15 @@ func parseRunOpts(c *cli.Context) *devstep.DockerRunOpts {
 	runOpts := &devstep.DockerRunOpts{
 		Publish: c.StringSlice("publish"),
 		Links:   c.StringSlice("link"),
+		Env:     make(map[string]string),
 	}
+
+	// Env vars
+	for _, envVar := range c.StringSlice("env") {
+		varAndValue := strings.Split(envVar, "=")
+		runOpts.Env[varAndValue[0]] = varAndValue[1]
+	}
+
 	// Validate ports
 	validPort := regexp.MustCompile(`^\d+:\d+$`)
 	for _, port := range runOpts.Publish {
