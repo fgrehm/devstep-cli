@@ -100,17 +100,19 @@ func main() {
 	app.Flags = []cli.Flag{
 		cli.StringFlag{Name: "log-level, l", Usage: "log level", EnvVar: "DEVSTEP_LOG"},
 	}
+	app.Before = func(c *cli.Context) error {
+		devstep.SetLogLevel(c.GlobalString("log-level"))
+		return nil
+	}
 	app.Commands = commands
 
-	app.Run(os.Args)
+	app.RunAndExitOnError()
 }
 
 var buildCmd = cli.Command{
 	Name:  "build",
 	Usage: "build a docker image for the current project",
 	Action: func(c *cli.Context) {
-		devstep.SetLogLevel(c.GlobalString("log-level"))
-
 		err := newProject().Build(client)
 		if err != nil {
 			fmt.Println(err)
@@ -123,8 +125,6 @@ var bootstrapCmd = cli.Command{
 	Name:  "bootstrap",
 	Usage: "bootstrap an environment for the current project",
 	Action: func(c *cli.Context) {
-		devstep.SetLogLevel(c.GlobalString("log-level"))
-
 		err := newProject().Bootstrap(client)
 		if err != nil {
 			fmt.Println(err)
@@ -148,8 +148,6 @@ var hackCmd = cli.Command{
 		}
 	},
 	Action: func(c *cli.Context) {
-		devstep.SetLogLevel(c.GlobalString("log-level"))
-
 		runOpts := parseRunOpts(c)
 		err := newProject().Hack(client, runOpts)
 		if err != nil {
@@ -164,8 +162,6 @@ var runCmd = cli.Command{
 	Usage: "Run a one off command against the current base image",
 	Flags: dockerRunFlags,
 	Action: func(c *cli.Context) {
-		devstep.SetLogLevel(c.GlobalString("log-level"))
-
 		runOpts := parseRunOpts(c)
 		runOpts.Cmd = c.Args()
 
@@ -200,8 +196,6 @@ var binstubsCmd = cli.Command{
 	Name:  "binstubs",
 	Usage: "Generate binstubs for the commands specified on devstep.yml",
 	Action: func(c *cli.Context) {
-		devstep.SetLogLevel(c.GlobalString("log-level"))
-
 		project := newProject()
 		commands := project.Config().Commands
 
@@ -234,8 +228,6 @@ var cleanCmd = cli.Command{
 		cli.BoolFlag{Name: "force, f", Usage: "skip confirmation"},
 	},
 	Action: func(c *cli.Context) {
-		devstep.SetLogLevel(c.GlobalString("log-level"))
-
 		if !c.Bool("force") {
 			fmt.Print("Are you sure? [N/y] ")
 
@@ -277,8 +269,6 @@ var infoCmd = cli.Command{
 	Name:  "info",
 	Usage: "show information about the current environment",
 	Action: func(c *cli.Context) {
-		devstep.SetLogLevel(c.GlobalString("log-level"))
-
 		config := loadConfig()
 		printConfig(config)
 	},
