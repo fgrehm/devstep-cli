@@ -1,0 +1,20 @@
+#!/bin/bash
+
+set -e
+
+VERSION=$(build/devstep -v | sed 's/devstep version //')
+TAG="v${VERSION}"
+echo "Will release ${TAG} in five seconds"
+
+sleep 5
+
+RELEASE_DIR="build/releases/${TAG}"
+mkdir -p $RELEASE_DIR
+cp build/devstep ${RELEASE_DIR}/devstep
+
+echo 'Releasing...'
+
+git tag $TAG
+git push && git push --tags
+
+gh release create -d -a ${RELEASE_DIR} ${TAG}

@@ -2,6 +2,8 @@ working_dir: '/.devstep/gocode/src/github.com/fgrehm/devstep-cli'
 privileged: true
 volumes:
   - '{{env "HOME"}}/devstep/development/docker:/var/lib/docker'
+  - '/usr/bin/gh:/.devstep/bin/gh'
+  - '{{env "HOME"}}/.config/gh:/.devstep/.config/gh'
 commands:
   go:
     # No custom options
@@ -9,3 +11,5 @@ commands:
     # No custom options
   watchf:
     cmd: ["bash", "-c", "'rm -f .watchf.pid && watchf'"]
+  release:
+    cmd: ["make", "release"]

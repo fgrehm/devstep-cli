@@ -23,3 +23,6 @@ vet:
 coverage:
 	@mkdir -p build
 	gocov test github.com/fgrehm/devstep-cli/devstep | gocov-html > build/coverage.html
+
+release: deps test vet build
+	@./bin/release
