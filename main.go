@@ -101,8 +101,7 @@ func main() {
 		cli.StringFlag{Name: "log-level, l", Usage: "log level", EnvVar: "DEVSTEP_LOG"},
 	}
 	app.Before = func(c *cli.Context) error {
-		devstep.SetLogLevel(c.GlobalString("log-level"))
-		return nil
+		return devstep.SetLogLevel(c.GlobalString("log-level"))
 	}
 	app.Commands = commands
 
