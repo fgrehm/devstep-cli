@@ -6,6 +6,7 @@ ci: deps test vet build
 
 deps:
 	go get ./...
+	go get code.google.com/p/go.tools/cmd/vet
 
 build: $(wildcard **/*.go)
 	@echo "Building CLI..."

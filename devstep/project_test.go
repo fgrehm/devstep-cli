@@ -46,12 +46,14 @@ func Test_Hack(t *testing.T) {
 }
 
 func Test_HackUsesDockerConfigs(t *testing.T) {
+	var privileged *bool; { t := true; privileged = &t }
+
 	project, err := devstep.NewProject(&devstep.ProjectConfig{
 		HostDir:  "/path/on/host",
 		GuestDir: "/path/on/guest",
 		CacheDir: "/cache/path/on/host",
 		Defaults: &devstep.DockerRunOpts{
-			Privileged: true,
+			Privileged: privileged,
 			Links:      []string{"some:link"},
 			Volumes:    []string{"/some:/volume"},
 			Env:        map[string]string{"SOME": "ENV"},
@@ -74,7 +76,7 @@ func Test_HackUsesDockerConfigs(t *testing.T) {
 	err = project.Hack(clientMock, nil)
 	ok(t, err)
 
-	assert(t, runOpts.Privileged, "Privileged is false")
+	assert(t, *runOpts.Privileged, "Privileged is false")
 
 	assert(t, inArray("/path/on/host:/path/on/guest", runOpts.Volumes), "Project dir was not shared")
 	assert(t, inArray("/cache/path/on/host:/.devstep/cache", runOpts.Volumes), "Cache dir was not shared")
@@ -146,18 +148,21 @@ func Test_Build(t *testing.T) {
 }
 
 func Test_BuildUsesGlobalDockerConfigs(t *testing.T) {
+	var privilegedTrue *bool; { t := true; privilegedTrue = &t }
+	var privilegedFalse *bool; { f := false; privilegedFalse = &f }
+
 	project, err := devstep.NewProject(&devstep.ProjectConfig{
 		HostDir:  "/path/on/host",
 		GuestDir: "/path/on/guest",
 		CacheDir: "/cache/path/on/host",
 		Defaults: &devstep.DockerRunOpts{
-			Privileged: true,
+			Privileged: privilegedTrue,
 			Links:      []string{"some:link"},
 			Volumes:    []string{"/some:/volume"},
 			Env:        map[string]string{"SOME": "ENV"},
 		},
 		HackOpts: &devstep.DockerRunOpts{
-			Privileged: false,
+			Privileged: privilegedFalse,
 			Links:      []string{"other:link"},
 			Volumes:    []string{"/other:/volume"},
 			Env:        map[string]string{"OTHER": "VALUE"},
@@ -188,7 +193,7 @@ func Test_BuildUsesGlobalDockerConfigs(t *testing.T) {
 	err = project.Build(clientMock)
 	ok(t, err)
 
-	assert(t, runOpts.Privileged, "Privileged is set to false")
+	assert(t, *runOpts.Privileged, "Privileged is set to false")
 	assert(t, inArray("/path/on/host:/path/on/guest", runOpts.Volumes), "Project dir was not shared")
 	assert(t, inArray("/cache/path/on/host:/.devstep/cache", runOpts.Volumes), "Cache dir was not shared")
 

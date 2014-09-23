@@ -16,8 +16,8 @@ func Test_Defaults(t *testing.T) {
 
 	ok(t, err)
 
-	equals(t, "fgrehm/devstep:v0.1.0", config.SourceImage)
-	equals(t, "fgrehm/devstep:v0.1.0", config.BaseImage)
+	equals(t, "fgrehm/devstep:v0.2.0", config.SourceImage)
+	equals(t, "fgrehm/devstep:v0.2.0", config.BaseImage)
 	equals(t, projectRoot, config.HostDir)
 	equals(t, "/workspace", config.GuestDir)
 	equals(t, "/tmp/devstep/cache", config.CacheDir)
@@ -35,13 +35,13 @@ func Test_DefaultsWithBlankValuesOnYaml(t *testing.T) {
 
 	ok(t, err)
 
-	equals(t, "fgrehm/devstep:v0.1.0", config.SourceImage)
-	equals(t, "fgrehm/devstep:v0.1.0", config.BaseImage)
+	equals(t, "fgrehm/devstep:v0.2.0", config.SourceImage)
+	equals(t, "fgrehm/devstep:v0.2.0", config.BaseImage)
 	equals(t, projectRoot, config.HostDir)
 	equals(t, "/workspace", config.GuestDir)
 	equals(t, "/tmp/devstep/cache", config.CacheDir)
 	equals(t, "devstep/a-project-dir", config.RepositoryName)
-	assert(t, !config.Defaults.Privileged, "Privileged is set by default")
+	assert(t, config.Defaults.Privileged == nil, "Privileged is set by default")
 }
 
 func Test_BaseImageGetsSetWhenRepositoryTagExists(t *testing.T) {
@@ -184,7 +184,7 @@ hack:
 	equals(t, "source/image:tag", config.BaseImage)
 	equals(t, "/custom/cache/dir", config.CacheDir)
 	equals(t, "/path/to/guest/dir", config.GuestDir)
-	assert(t, config.Defaults.Privileged, "Privileged is not set")
+	assert(t, *config.Defaults.Privileged, "Privileged is not set")
 
 	assert(t, config.Defaults != nil, "Defaults were not parsed")
 	equals(t, []string{"cname:name", "other_cname:other_name"}, config.Defaults.Links)
