@@ -63,8 +63,13 @@ func loadConfig() *devstep.ProjectConfig {
 		os.Exit(1)
 	}
 
+	dockerHost := os.Getenv("DOCKER_HOST")
+	if dockerHost == "" {
+		dockerHost = "unix:///var/run/docker.sock"
+	}
+
 	homeDir := os.Getenv("HOME")
-	client = devstep.NewClient("unix:///var/run/docker.sock")
+	client = devstep.NewClient(dockerHost)
 	loader := devstep.NewConfigLoader(client, homeDir, projectRoot)
 
 	config, err := loader.Load()
