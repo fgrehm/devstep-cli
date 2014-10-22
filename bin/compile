@@ -16,13 +16,13 @@ if ! $(which gox &> /dev/null); then
   gox -verbose -build-toolchain -osarch="darwin/amd64 linux/amd64"
 fi
 
-if ! [ -f $1/build/devstep ]; then
+if ! [ -f $1/build/linux_amd64 ]; then
   make build
 fi
 
 if ! [ -L /.devstep/bin/devstep ]; then
   echo 'Symlinking CLI'
-  ln -s `pwd`/build/devstep $HOME/bin/devstep
+  ln -s `pwd`/build/linux_amd64 $HOME/bin/devstep
 fi
 
 configure-addons docker
