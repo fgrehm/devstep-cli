@@ -10,7 +10,8 @@ sleep 5
 
 RELEASE_DIR="build/releases/${TAG}"
 mkdir -p $RELEASE_DIR
-cp build/devstep ${RELEASE_DIR}/devstep
+cp build/darwin_amd64 ${RELEASE_DIR}/
+cp build/linux_amd64 ${RELEASE_DIR}/
 
 echo 'Releasing...'
 

@@ -10,6 +10,12 @@ go get -v gopkg.in/matm/v1/gocov-html
 go get -v github.com/parkghost/watchf
 go get -v code.google.com/p/go.tools/cmd/vet
 
+if ! $(which gox &> /dev/null); then
+  echo 'Building cross compile toolchain'
+  go get -v github.com/mitchellh/gox
+  gox -verbose -build-toolchain -osarch="darwin/amd64 linux/amd64"
+fi
+
 if ! [ -f $1/build/devstep ]; then
   make build
 fi
