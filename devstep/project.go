@@ -64,11 +64,11 @@ func (p *project) Build(client DockerClient) error {
 		Image:      p.BaseImage,
 		AutoRemove: false,
 		Pty:        true,
-		Cmd:        []string{"/.devstep/bin/build-project", p.GuestDir},
+		Cmd:        []string{"/opt/devstep/bin/build-project", p.GuestDir},
 		Workdir:    p.GuestDir,
 		Volumes: []string{
 			p.HostDir + ":" + p.GuestDir,
-			p.CacheDir + ":/.devstep/cache",
+			p.CacheDir + ":/home/devstep/cache",
 		},
 	})
 
@@ -114,7 +114,7 @@ func (p *project) Bootstrap(client DockerClient) error {
 		Workdir:    p.GuestDir,
 		Volumes: []string{
 			p.HostDir + ":" + p.GuestDir,
-			p.CacheDir + ":/.devstep/cache",
+			p.CacheDir + ":/home/devstep/cache",
 		},
 	})
 
@@ -154,11 +154,11 @@ func (p *project) Hack(client DockerClient, cliHackOpts *DockerRunOpts) error {
 		Image:      p.BaseImage,
 		AutoRemove: true,
 		Pty:        true,
-		Cmd:        []string{"/.devstep/bin/hack"},
+		Cmd:        []string{"/opt/devstep/bin/hack"},
 		Workdir:    p.GuestDir,
 		Volumes: []string{
 			p.HostDir + ":" + p.GuestDir,
-			p.CacheDir + ":/.devstep/cache",
+			p.CacheDir + ":/home/devstep/cache",
 		},
 	})
 
@@ -176,7 +176,7 @@ func (p *project) Run(client DockerClient, cliRunOpts *DockerRunOpts) error {
 		Workdir:    p.GuestDir,
 		Volumes: []string{
 			p.HostDir + ":" + p.GuestDir,
-			p.CacheDir + ":/.devstep/cache",
+			p.CacheDir + ":/home/devstep/cache",
 		},
 	})
 

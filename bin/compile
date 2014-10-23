@@ -20,7 +20,7 @@ if ! [ -f $1/build/linux_amd64 ]; then
   make build
 fi
 
-if ! [ -L /.devstep/bin/devstep ]; then
+if ! [ -L $HOME/bin/devstep ]; then
   echo 'Symlinking CLI'
   ln -s `pwd`/build/linux_amd64 $HOME/bin/devstep
 fi
