@@ -2,7 +2,7 @@
 
 set -e
 
-source $HOME/load-env.sh
+source $DEVSTEP_PATH/load-env.sh
 
 echo 'Fetching utilities...'
 go get -v github.com/axw/gocov/gocov
