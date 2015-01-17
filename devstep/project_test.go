@@ -32,11 +32,11 @@ func Test_Hack(t *testing.T) {
 	equals(t, "repo/name:tag", runOpts.Image)
 	assert(t, runOpts.AutoRemove, "AutoRemove is false")
 	assert(t, runOpts.Pty, "Pseudo tty allocation is disabled")
-	equals(t, []string{"/.devstep/bin/hack"}, runOpts.Cmd)
+	equals(t, []string{"/opt/devstep/bin/hack"}, runOpts.Cmd)
 	equals(t, "/path/on/guest", runOpts.Workdir)
 
 	assert(t, inArray("/path/on/host:/path/on/guest", runOpts.Volumes), "Project dir was not shared")
-	assert(t, inArray("/cache/path/on/host:/.devstep/cache", runOpts.Volumes), "Cache dir was not shared")
+	assert(t, inArray("/cache/path/on/host:/home/devstep/cache", runOpts.Volumes), "Cache dir was not shared")
 
 	assert(t, inArray("foo:bar", runOpts.Links), "Link was not shared")
 	assert(t, inArray("bar:foo", runOpts.Links), "Link was not shared")
@@ -83,7 +83,7 @@ func Test_HackUsesDockerConfigs(t *testing.T) {
 	assert(t, *runOpts.Privileged, "Privileged is false")
 
 	assert(t, inArray("/path/on/host:/path/on/guest", runOpts.Volumes), "Project dir was not shared")
-	assert(t, inArray("/cache/path/on/host:/.devstep/cache", runOpts.Volumes), "Cache dir was not shared")
+	assert(t, inArray("/cache/path/on/host:/home/devstep/cache", runOpts.Volumes), "Cache dir was not shared")
 
 	assert(t, inArray("/some:/volume", runOpts.Volumes), "Default volumes were not set")
 	assert(t, inArray("some:link", runOpts.Links), "Default links were not set")
@@ -130,10 +130,10 @@ func Test_Build(t *testing.T) {
 	equals(t, "repo/name:tag", runOpts.Image)
 	assert(t, !runOpts.AutoRemove, "AutoRemove is true")
 	assert(t, runOpts.Pty, "Pseudo tty allocation is disabled")
-	equals(t, []string{"/.devstep/bin/build-project", "/path/on/guest"}, runOpts.Cmd)
+	equals(t, []string{"/opt/devstep/bin/build-project", "/path/on/guest"}, runOpts.Cmd)
 	equals(t, "/path/on/guest", runOpts.Workdir)
 	assert(t, inArray("/path/on/host:/path/on/guest", runOpts.Volumes), "Project dir was not shared")
-	assert(t, inArray("/cache/path/on/host:/.devstep/cache", runOpts.Volumes), "Cache dir was not shared")
+	assert(t, inArray("/cache/path/on/host:/home/devstep/cache", runOpts.Volumes), "Cache dir was not shared")
 
 	equals(t, 2, len(commitOpts))
 
@@ -207,7 +207,7 @@ func Test_BuildUsesGlobalDockerConfigs(t *testing.T) {
 
 	assert(t, *runOpts.Privileged, "Privileged is set to false")
 	assert(t, inArray("/path/on/host:/path/on/guest", runOpts.Volumes), "Project dir was not shared")
-	assert(t, inArray("/cache/path/on/host:/.devstep/cache", runOpts.Volumes), "Cache dir was not shared")
+	assert(t, inArray("/cache/path/on/host:/home/devstep/cache", runOpts.Volumes), "Cache dir was not shared")
 
 	assert(t, inArray("/some:/volume", runOpts.Volumes), "Default volumes were not set")
 	assert(t, inArray("some:link", runOpts.Links), "Default links were not set")
