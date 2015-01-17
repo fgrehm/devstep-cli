@@ -38,7 +38,7 @@ func main() {
 	app.Version = "0.2.0"
 	app.EnableBashCompletion = true
 	app.Flags = []cli.Flag{
-		cli.StringFlag{Name: "log-level, l", Usage: "log level", EnvVar: "DEVSTEP_LOG"},
+		cli.StringFlag{Name: "log-level, l", Value: "warning", Usage: "log level", EnvVar: "DEVSTEP_LOG"},
 	}
 	app.Before = func(c *cli.Context) error {
 		return devstep.SetLogLevel(c.GlobalString("log-level"))
