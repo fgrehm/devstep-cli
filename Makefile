@@ -1,18 +1,21 @@
 .PHONY: test build coverage ci deps
 
-default: test
+default: test build
 
-ci: deps test vet build
+ci: deps test vet build-ci
 
 deps:
 	go get ./...
-	go get code.google.com/p/go.tools/cmd/vet
+	go get golang.org/x/tools/cmd/vet
 
 build: $(wildcard **/*.go)
 	@echo "Building CLI..."
 	@mkdir -p build
 	gox -verbose -osarch="darwin/amd64 linux/amd64" -output="build/{{.OS}}_{{.Arch}}"
 	@echo "DONE"
+
+build-ci: $(wildcard **/*.go)
+	go build ./...
 
 test:
 	go test ./...
