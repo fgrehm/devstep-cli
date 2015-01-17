@@ -117,7 +117,8 @@ func (c *dockerClient) ListTags(repositoryName string) ([]string, error) {
 
 	log.Debug("Fetching tags for '%s'", repositoryName)
 
-	apiImages, err := c.client.ListImages(false)
+	// TODO: Use go-dockerclient's support for filtering images
+	apiImages, err := c.client.ListImages(docker.ListImagesOptions{All: true})
 	tags := []string{}
 	for _, img := range apiImages {
 		for _, repoTag := range img.RepoTags {
