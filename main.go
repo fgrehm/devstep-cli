@@ -225,11 +225,13 @@ var runCmd = cli.Command{
 		// process args
 		runOpts.Cmd = append([]string{"--"}, runOpts.Cmd...)
 
-		err := project.Run(client, runOpts)
+		result, err := project.Run(client, runOpts)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
+
+		os.Exit(result.ExitCode)
 	},
 }
 
