@@ -307,6 +307,10 @@ var pristineCmd = cli.Command{
 			fmt.Println("-e")
 			fmt.Println("--env")
 			fmt.Println("--privileged")
+			fmt.Println("-f")
+			fmt.Println("--force")
+			fmt.Println("-b")
+			fmt.Println("--bootstrap")
 		}
 	},
 	Action: func(c *cli.Context) {
