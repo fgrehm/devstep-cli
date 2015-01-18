@@ -161,6 +161,19 @@ var runCmd = cli.Command{
 	Name:  "run",
 	Usage: "Run a one off command against the current base image",
 	Flags: dockerRunFlags,
+	BashComplete: func(c *cli.Context) {
+		args := c.Args()
+		if len(args) == 0 {
+			fmt.Println("-p")
+			fmt.Println("--publish")
+			fmt.Println("--link")
+			fmt.Println("-w")
+			fmt.Println("--working_dir")
+			fmt.Println("-e")
+			fmt.Println("--env")
+			fmt.Println("--privileged")
+		}
+	},
 	Action: func(c *cli.Context) {
 		project := newProject()
 		commands := project.Config().Commands
