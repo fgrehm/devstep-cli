@@ -295,7 +295,11 @@ func printConfig(config *devstep.ProjectConfig) {
 }
 
 func printDockerRunOpts(opts *devstep.DockerRunOpts, prefix string) {
-	fmt.Printf("%sPrivileged: %v\n", prefix, *opts.Privileged)
+	privileged := false
+	if opts.Privileged != nil {
+		privileged = *opts.Privileged
+	}
+	fmt.Printf("%sPrivileged: %v\n", prefix, privileged)
 	fmt.Printf("%sLinks:      %v\n", prefix, opts.Links)
 	fmt.Printf("%sVolumes:    %v\n", prefix, opts.Volumes)
 	fmt.Printf("%sEnv:        %v\n", prefix, opts.Env)
