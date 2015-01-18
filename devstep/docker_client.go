@@ -19,6 +19,7 @@ type DockerClient interface {
 }
 
 type DockerRunOpts struct {
+	Name       string
 	AutoRemove bool
 	Pty        bool
 	Workdir    string
@@ -146,6 +147,9 @@ func (this DockerRunOpts) Merge(others ...*DockerRunOpts) *DockerRunOpts {
 			continue
 		}
 
+		if other.Name != "" {
+			this.Name = other.Name
+		}
 		if other.Image != "" {
 			this.Image = other.Image
 		}
@@ -187,6 +191,7 @@ func (opts *DockerRunOpts) toCreateOpts() docker.CreateContainerOptions {
 	}
 
 	return docker.CreateContainerOptions{
+		Name: opts.Name,
 		Config: &docker.Config{
 			Image:        opts.Image,
 			Cmd:          opts.Cmd,

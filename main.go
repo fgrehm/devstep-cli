@@ -160,7 +160,10 @@ var bootstrapCmd = cli.Command{
 var hackCmd = cli.Command{
 	Name:  "hack",
 	Usage: "start a hacking session for the current project",
-	Flags: dockerRunFlags,
+	Flags: append(
+		[]cli.Flag{cli.StringFlag{Name: "name", Usage: "Name to be assigned to the container"}},
+		dockerRunFlags...,
+	),
 	BashComplete: func(c *cli.Context) {
 		args := c.Args()
 		if len(args) == 0 {
@@ -172,6 +175,7 @@ var hackCmd = cli.Command{
 			fmt.Println("-e")
 			fmt.Println("--env")
 			fmt.Println("--privileged")
+			fmt.Println("--name")
 		}
 	},
 	Action: func(c *cli.Context) {
@@ -188,7 +192,10 @@ var hackCmd = cli.Command{
 var runCmd = cli.Command{
 	Name:  "run",
 	Usage: "Run a one off command against the current base image",
-	Flags: dockerRunFlags,
+	Flags: append(
+		[]cli.Flag{cli.StringFlag{Name: "name", Usage: "Name to be assigned to the container"}},
+		dockerRunFlags...,
+	),
 	BashComplete: func(c *cli.Context) {
 		args := c.Args()
 		if len(args) == 0 {
@@ -200,6 +207,7 @@ var runCmd = cli.Command{
 			fmt.Println("-e")
 			fmt.Println("--env")
 			fmt.Println("--privileged")
+			fmt.Println("--name")
 		}
 	},
 	Action: func(c *cli.Context) {
@@ -377,6 +385,7 @@ func parseRunOpts(c *cli.Context) *devstep.DockerRunOpts {
 	runOpts := &devstep.DockerRunOpts{
 		Publish: c.StringSlice("publish"),
 		Links:   c.StringSlice("link"),
+		Name:    c.String("name"),
 		Env:     make(map[string]string),
 	}
 
