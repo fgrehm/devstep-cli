@@ -272,7 +272,7 @@ var cleanCmd = cli.Command{
 	},
 	Action: func(c *cli.Context) {
 		if !c.Bool("force") {
-			if ok := prompt.Confirm("Are you sure? [N/y] "); !ok {
+			if ok := prompt.Confirm("Are you sure? [y/n]"); !ok {
 				fmt.Println("Aborting")
 				os.Exit(1)
 			}
@@ -290,7 +290,10 @@ var pristineCmd = cli.Command{
 	Name:  "pristine",
 	Usage: "rebuild project image from scratch",
 	Flags: append(
-		[]cli.Flag{cli.BoolFlag{Name: "force, f", Usage: "skip clean confirmation"}},
+		[]cli.Flag{
+			cli.BoolFlag{Name: "force, f", Usage: "skip clean confirmation"},
+			cli.BoolFlag{Name: "bootstrap, b", Usage: "manually bootstrap your environment"},
+		},
 		dockerRunFlags...,
 	),
 	BashComplete: func(c *cli.Context) {
@@ -309,7 +312,11 @@ var pristineCmd = cli.Command{
 	Action: func(c *cli.Context) {
 		// TODO: Figure out if this is the right way to invoke other CLI actions
 		cleanCmd.Action(c)
-		buildCmd.Action(c)
+		if c.Bool("bootstrap") {
+			bootstrapCmd.Action(c)
+		} else {
+			buildCmd.Action(c)
+		}
 	},
 }
 
