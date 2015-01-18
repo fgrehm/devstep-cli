@@ -108,6 +108,20 @@ func newProject() devstep.Project {
 var buildCmd = cli.Command{
 	Name:  "build",
 	Usage: "build a docker image for the current project",
+	Flags: dockerRunFlags,
+	BashComplete: func(c *cli.Context) {
+		args := c.Args()
+		if len(args) == 0 {
+			fmt.Println("-p")
+			fmt.Println("--publish")
+			fmt.Println("--link")
+			fmt.Println("-w")
+			fmt.Println("--working_dir")
+			fmt.Println("-e")
+			fmt.Println("--env")
+			fmt.Println("--privileged")
+		}
+	},
 	Action: func(c *cli.Context) {
 		err := newProject().Build(client)
 		if err != nil {
@@ -120,6 +134,20 @@ var buildCmd = cli.Command{
 var bootstrapCmd = cli.Command{
 	Name:  "bootstrap",
 	Usage: "bootstrap an environment for the current project",
+	Flags: dockerRunFlags,
+	BashComplete: func(c *cli.Context) {
+		args := c.Args()
+		if len(args) == 0 {
+			fmt.Println("-p")
+			fmt.Println("--publish")
+			fmt.Println("--link")
+			fmt.Println("-w")
+			fmt.Println("--working_dir")
+			fmt.Println("-e")
+			fmt.Println("--env")
+			fmt.Println("--privileged")
+		}
+	},
 	Action: func(c *cli.Context) {
 		err := newProject().Bootstrap(client)
 		if err != nil {
@@ -259,8 +287,22 @@ var cleanCmd = cli.Command{
 var pristineCmd = cli.Command{
 	Name:  "pristine",
 	Usage: "rebuild project image from scratch",
-	Flags: []cli.Flag{
-		cli.BoolFlag{Name: "force, f", Usage: "skip clean confirmation"},
+	Flags: append(
+		[]cli.Flag{cli.BoolFlag{Name: "force, f", Usage: "skip clean confirmation"}},
+		dockerRunFlags...,
+	),
+	BashComplete: func(c *cli.Context) {
+		args := c.Args()
+		if len(args) == 0 {
+			fmt.Println("-p")
+			fmt.Println("--publish")
+			fmt.Println("--link")
+			fmt.Println("-w")
+			fmt.Println("--working_dir")
+			fmt.Println("-e")
+			fmt.Println("--env")
+			fmt.Println("--privileged")
+		}
 	},
 	Action: func(c *cli.Context) {
 		// TODO: Figure out if this is the right way to invoke other CLI actions
