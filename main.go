@@ -134,7 +134,12 @@ var buildCmd = cli.Command{
 var bootstrapCmd = cli.Command{
 	Name:  "bootstrap",
 	Usage: "bootstrap an environment for the current project",
-	Flags: dockerRunFlags,
+	Flags: append(
+		[]cli.Flag{
+			cli.StringFlag{Name: "repository, r", Usage: "set the container repository name"},
+		},
+		dockerRunFlags...,
+	),
 	BashComplete: func(c *cli.Context) {
 		args := c.Args()
 		if len(args) == 0 {
@@ -146,10 +151,17 @@ var bootstrapCmd = cli.Command{
 			fmt.Println("-e")
 			fmt.Println("--env")
 			fmt.Println("--privileged")
+			fmt.Println("--repository")
 		}
 	},
 	Action: func(c *cli.Context) {
-		err := newProject().Bootstrap(client)
+		project := newProject()
+
+		if repo := c.String("repository"); repo != "" {
+			project.Config().RepositoryName = repo
+		}
+
+		err := project.Bootstrap(client)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -301,6 +313,7 @@ var pristineCmd = cli.Command{
 		[]cli.Flag{
 			cli.BoolFlag{Name: "force, f", Usage: "skip clean confirmation"},
 			cli.BoolFlag{Name: "bootstrap, b", Usage: "manually bootstrap your environment"},
+			cli.StringFlag{Name: "repository, r", Usage: "set the container repository name"},
 		},
 		dockerRunFlags...,
 	),
@@ -319,6 +332,7 @@ var pristineCmd = cli.Command{
 			fmt.Println("--force")
 			fmt.Println("-b")
 			fmt.Println("--bootstrap")
+			fmt.Println("--repository")
 		}
 	},
 	Action: func(c *cli.Context) {
