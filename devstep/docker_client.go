@@ -69,21 +69,20 @@ func (c *dockerClient) Run(opts *DockerRunOpts) (*DockerRunResult, error) {
 		log.Info("Starting container with pseudo terminal")
 		err = dockerpty.Start(c.client, container, hostConfig)
 	} else {
-		return nil, errors.New("Starting containers without Pty was not needed until this moment :)")
+		return nil, errors.New("Starting containers without Pty was not needed until this moment, please implement :)")
 	}
+
+	result := &DockerRunResult{ ContainerID: container.ID, }
 	if err != nil {
-		return nil, errors.New("Error starting container:\n  " + err.Error())
+		return result, errors.New("Error starting container:\n  " + err.Error())
 	}
 
 	container, err = c.client.InspectContainer(container.ID)
 	if err != nil {
-		return nil, errors.New("Error inspecting container:\n  " + err.Error())
+		return result, errors.New("Error inspecting container:\n  " + err.Error())
 	}
 
-	return &DockerRunResult{
-		ContainerID: container.ID,
-		ExitCode:    container.State.ExitCode,
-	}, nil
+	return result, nil
 }
 
 func (c *dockerClient) RemoveContainer(containerID string) error {
