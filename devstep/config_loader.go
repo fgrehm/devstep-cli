@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"text/template"
+	"time"
 )
 
 type ConfigLoader interface {
@@ -105,6 +106,8 @@ func (l *configLoader) Load() (*ProjectConfig, error) {
 func (l *configLoader) buildDefaultConfig() (*ProjectConfig, error) {
 	projectDirName := filepath.Base(l.projectRoot)
 	repositoryName := "devstep/" + projectDirName
+	suffix := time.Now().Local().Format("20060102150405")
+
 	config := &ProjectConfig{
 		SourceImage:    "fgrehm/devstep:v0.3.0",
 		RepositoryName: repositoryName,
@@ -112,6 +115,7 @@ func (l *configLoader) buildDefaultConfig() (*ProjectConfig, error) {
 		GuestDir:       "/workspace",
 		CacheDir:       "/tmp/devstep/cache",
 		Defaults: &DockerRunOpts{
+			Name:     projectDirName + "-" + suffix,
 			Env:      make(map[string]string),
 			Hostname: projectDirName,
 		},

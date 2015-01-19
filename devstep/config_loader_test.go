@@ -22,6 +22,8 @@ func Test_Defaults(t *testing.T) {
 	equals(t, "/workspace", config.GuestDir)
 	equals(t, "/tmp/devstep/cache", config.CacheDir)
 	equals(t, "devstep/a-project-dir", config.RepositoryName)
+	// DISCUSS: How can we mock or test the name value?
+	assert(t, config.Defaults.Name != "", "Name not set")
 }
 
 func Test_DefaultsWithBlankValuesOnYaml(t *testing.T) {
