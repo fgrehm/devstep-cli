@@ -10,8 +10,8 @@ import (
 // lifecycle of a Project.
 type Project interface {
 	Config() *ProjectConfig
-	Build(DockerClient) error
-	Bootstrap(DockerClient) error
+	Build(DockerClient, *DockerRunOpts) error
+	Bootstrap(DockerClient, *DockerRunOpts) error
 	Clean(DockerClient) error
 	Hack(DockerClient, *DockerRunOpts) error
 	Run(DockerClient, *DockerRunOpts) (*DockerRunResult, error)
@@ -57,10 +57,10 @@ func (p *project) Config() *ProjectConfig {
 }
 
 // Build the project and commit it to an image
-func (p *project) Build(client DockerClient) error {
+func (p *project) Build(client DockerClient, cliOpts *DockerRunOpts) error {
 	fmt.Printf("==> Building project from '%s'\n", p.BaseImage)
 
-	opts := p.Defaults.Merge(&DockerRunOpts{
+	opts := p.Defaults.Merge(cliOpts, &DockerRunOpts{
 		Image:      p.BaseImage,
 		AutoRemove: false,
 		Pty:        true,
@@ -103,10 +103,10 @@ func (p *project) Build(client DockerClient) error {
 }
 
 // Start a hacking session and commit it to an image if all goes well
-func (p *project) Bootstrap(client DockerClient) error {
+func (p *project) Bootstrap(client DockerClient, cliOpts *DockerRunOpts) error {
 	fmt.Printf("==> Creating container based on '%s'\n", p.BaseImage)
 
-	opts := p.Defaults.Merge(&DockerRunOpts{
+	opts := p.Defaults.Merge(cliOpts, &DockerRunOpts{
 		Image:      p.BaseImage,
 		AutoRemove: false,
 		Pty:        true,

@@ -124,7 +124,7 @@ func Test_Build(t *testing.T) {
 		return nil
 	}
 
-	err = project.Build(clientMock)
+	err = project.Build(clientMock, &devstep.DockerRunOpts{})
 	ok(t, err)
 
 	equals(t, "repo/name:tag", runOpts.Image)
@@ -202,7 +202,7 @@ func Test_BuildUsesGlobalDockerConfigs(t *testing.T) {
 		return nil
 	}
 
-	err = project.Build(clientMock)
+	err = project.Build(clientMock, &devstep.DockerRunOpts{})
 	ok(t, err)
 
 	assert(t, *runOpts.Privileged, "Privileged is set to false")
@@ -235,7 +235,7 @@ func Test_BuildWithErrorOnRun(t *testing.T) {
 
 	// TODO: Ensure the container gets removed
 
-	err = project.Build(clientMock)
+	err = project.Build(clientMock, &devstep.DockerRunOpts{})
 	equals(t, runError, err)
 }
 
@@ -253,7 +253,7 @@ func Test_BuildWithErrorOnCommit(t *testing.T) {
 		return errors.New("BOOM!")
 	}
 
-	err = project.Build(clientMock)
+	err = project.Build(clientMock, &devstep.DockerRunOpts{})
 	assert(t, err != nil, "No error raised")
 	assert(t, strings.HasPrefix(err.Error(), "Error commiting"), "Wrong message")
 }
@@ -274,7 +274,7 @@ func Test_BuildWithBadExitCode(t *testing.T) {
 
 	// TODO: Ensure the container gets removed
 
-	err = project.Build(clientMock)
+	err = project.Build(clientMock, &devstep.DockerRunOpts{})
 	assert(t, err != nil, "Did not error")
 }
 
