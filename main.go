@@ -123,7 +123,8 @@ var buildCmd = cli.Command{
 		}
 	},
 	Action: func(c *cli.Context) {
-		err := newProject().Build(client)
+		runOpts := parseRunOpts(c)
+		err := newProject().Build(client, runOpts)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -161,7 +162,8 @@ var bootstrapCmd = cli.Command{
 			project.Config().RepositoryName = repo
 		}
 
-		err := project.Bootstrap(client)
+		runOpts := parseRunOpts(c)
+		err := project.Bootstrap(client, runOpts)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
