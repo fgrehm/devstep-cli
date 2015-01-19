@@ -292,6 +292,13 @@ var cleanCmd = cli.Command{
 	Flags: []cli.Flag{
 		cli.BoolFlag{Name: "force, f", Usage: "skip confirmation"},
 	},
+	BashComplete: func(c *cli.Context) {
+		args := c.Args()
+		if len(args) == 0 {
+			fmt.Println("-f")
+			fmt.Println("--force")
+		}
+	},
 	Action: func(c *cli.Context) {
 		if !c.Bool("force") {
 			if ok := prompt.Confirm("Are you sure? [y/n]"); !ok {
