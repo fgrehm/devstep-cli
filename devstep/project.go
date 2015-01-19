@@ -77,7 +77,7 @@ func (p *project) Build(client DockerClient) error {
 
 	if err != nil {
 		// TODO: Write test for this behavior
-		if result != nil && result.ContainerID != "" {
+		if result != nil && result.ContainerID != "" && result.ExitCode == 0 {
 			client.RemoveContainer(result.ContainerID)
 		}
 		return err
@@ -123,7 +123,7 @@ func (p *project) Bootstrap(client DockerClient) error {
 
 	if err != nil {
 		// TODO: Write test for this behavior
-		if result != nil && result.ContainerID != "" {
+		if result != nil && result.ContainerID != "" && result.ExitCode == 0  {
 			client.RemoveContainer(result.ContainerID)
 		}
 		return err
