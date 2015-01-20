@@ -5,12 +5,12 @@ import (
 )
 
 type MockClient struct {
-	RunFunc             func(*devstep.DockerRunOpts) (*devstep.DockerRunResult, error)
-	RemoveContainerFunc func(string) error
+	RunFunc              func(*devstep.DockerRunOpts) (*devstep.DockerRunResult, error)
+	RemoveContainerFunc  func(string) error
 	ContainerChangedFunc func(string) (bool, error)
-	CommitFunc          func(*devstep.DockerCommitOpts) error
-	RemoveImageFunc     func(string) error
-	ListTagsFunc        func(string) ([]string, error)
+	CommitFunc           func(*devstep.DockerCommitOpts) error
+	RemoveImageFunc      func(string) error
+	ListTagsFunc         func(string) ([]string, error)
 }
 
 func (c *MockClient) Run(runOpts *devstep.DockerRunOpts) (*devstep.DockerRunResult, error) {
