@@ -13,6 +13,7 @@ import (
 type DockerClient interface {
 	Run(*DockerRunOpts) (*DockerRunResult, error)
 	RemoveContainer(string) error
+	ContainerChanged(string) (bool, error)
 	Commit(*DockerCommitOpts) error
 	RemoveImage(string) error
 	ListTags(string) ([]string, error)
@@ -95,6 +96,36 @@ func (c *dockerClient) RemoveContainer(containerID string) error {
 		Force:         true,
 		RemoveVolumes: true,
 	})
+}
+
+func (c *dockerClient) ContainerChanged(containerID string) (bool, error) {
+	changes, err := c.client.ContainerChanges(containerID)
+	log.Debug("Container changes '%v'", changes)
+
+	if len(changes) == 0 {
+		return false, err
+	}
+
+	blankChanges := []docker.Change{
+		docker.Change{
+			Path: "/home",
+			Kind: docker.ChangeModify,
+		},
+		docker.Change{
+			Path: "/home/devstep",
+			Kind: docker.ChangeModify,
+		},
+		docker.Change{
+			Path: "/home/devstep/.rnd",
+			Kind: docker.ChangeModify,
+		},
+	}
+	for i, v := range blankChanges {
+		if v != changes[i] {
+			return true, err
+		}
+	}
+	return len(changes) > 3, err
 }
 
 func (c *dockerClient) Commit(opts *DockerCommitOpts) error {

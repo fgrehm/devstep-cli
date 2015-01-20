@@ -89,13 +89,22 @@ func (p *project) Build(client DockerClient, cliOpts *DockerRunOpts) error {
 		return errors.New("Container exited with status != 0, skipping image commit.")
 	}
 
-	if err = p.commit(client, result.ContainerID, "latest"); err != nil {
+	if changed, err := client.ContainerChanged(result.ContainerID); err != nil {
 		return err
-	}
 
-	tag := time.Now().Local().Format("20060102150405")
-	if err = p.commit(client, result.ContainerID, tag); err != nil {
-		return err
+	} else if changed {
+		if err = p.commit(client, result.ContainerID, "latest"); err != nil {
+			return err
+		}
+
+		tag := time.Now().Local().Format("20060102150405")
+		if err = p.commit(client, result.ContainerID, tag); err != nil {
+			return err
+		}
+
+	} else {
+		// TODO: Write test for this behavior
+		fmt.Println("==> Skipping commit (container did not have any file changed)")
 	}
 
 	fmt.Println("==> Removing container used for build")
@@ -135,13 +144,22 @@ func (p *project) Bootstrap(client DockerClient, cliOpts *DockerRunOpts) error {
 		return errors.New("Container exited with status != 0")
 	}
 
-	if err = p.commit(client, result.ContainerID, "latest"); err != nil {
+	if changed, err := client.ContainerChanged(result.ContainerID); err != nil {
 		return err
-	}
 
-	tag := time.Now().Local().Format("20060102150405")
-	if err = p.commit(client, result.ContainerID, tag); err != nil {
-		return err
+	} else if changed {
+		if err = p.commit(client, result.ContainerID, "latest"); err != nil {
+			return err
+		}
+
+		tag := time.Now().Local().Format("20060102150405")
+		if err = p.commit(client, result.ContainerID, tag); err != nil {
+			return err
+		}
+
+	} else {
+		// TODO: Write test for this behavior
+		fmt.Println("==> Skipping commit (container did not have any file changed)")
 	}
 
 	fmt.Println("==> Removing container used for bootstrapping")

@@ -7,6 +7,7 @@ import (
 type MockClient struct {
 	RunFunc             func(*devstep.DockerRunOpts) (*devstep.DockerRunResult, error)
 	RemoveContainerFunc func(string) error
+	ContainerChangedFunc func(string) (bool, error)
 	CommitFunc          func(*devstep.DockerCommitOpts) error
 	RemoveImageFunc     func(string) error
 	ListTagsFunc        func(string) ([]string, error)
@@ -18,6 +19,10 @@ func (c *MockClient) Run(runOpts *devstep.DockerRunOpts) (*devstep.DockerRunResu
 
 func (c *MockClient) RemoveContainer(containerID string) error {
 	return c.RemoveContainerFunc(containerID)
+}
+
+func (c *MockClient) ContainerChanged(containerID string) (bool, error) {
+	return c.ContainerChangedFunc(containerID)
 }
 
 func (c *MockClient) Commit(commitOpts *devstep.DockerCommitOpts) error {
@@ -39,6 +44,9 @@ func NewMockClient() *MockClient {
 		},
 		RunFunc: func(runOpts *devstep.DockerRunOpts) (*devstep.DockerRunResult, error) {
 			return &devstep.DockerRunResult{}, nil
+		},
+		ContainerChangedFunc: func(containerID string) (bool, error) {
+			return true, nil
 		},
 		CommitFunc: func(commitOpts *devstep.DockerCommitOpts) error {
 			return nil
