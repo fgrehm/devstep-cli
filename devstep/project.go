@@ -86,7 +86,7 @@ func (p *project) Build(client DockerClient, cliOpts *DockerRunOpts) error {
 	if result.ExitCode != 0 {
 		// TODO: Write test for this behavior
 		client.RemoveContainer(result.ContainerID)
-		return errors.New("Container exited with status != 0")
+		return errors.New("Container exited with status != 0, skipping image commit.")
 	}
 
 	if err = p.commit(client, result.ContainerID, "latest"); err != nil {

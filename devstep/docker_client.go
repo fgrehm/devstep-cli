@@ -72,14 +72,17 @@ func (c *dockerClient) Run(opts *DockerRunOpts) (*DockerRunResult, error) {
 		return nil, errors.New("Starting containers without Pty was not needed until this moment, please implement :)")
 	}
 
-	result := &DockerRunResult{ ContainerID: container.ID, }
 	if err != nil {
-		return result, errors.New("Error starting container:\n  " + err.Error())
+		return nil, errors.New("Error starting container:\n  " + err.Error())
 	}
 
 	container, err = c.client.InspectContainer(container.ID)
 	if err != nil {
-		return result, errors.New("Error inspecting container:\n  " + err.Error())
+		return nil, errors.New("Error inspecting container:\n  " + err.Error())
+	}
+	result := &DockerRunResult{
+		ContainerID: container.ID,
+		ExitCode:    container.State.ExitCode,
 	}
 
 	return result, nil
