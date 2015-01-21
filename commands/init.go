@@ -2,87 +2,68 @@ package commands
 
 import (
 	"fmt"
-	"github.com/codegangsta/cli"
-	"io/ioutil"
+	"github.com/fgrehm/devstep-cli/devstep"
 	"os"
+	"path/filepath"
 )
 
-var InitCmd = cli.Command{
-	Name: "init",
-	Action: func(c *cli.Context) {
-		projectRoot, err := os.Getwd()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+var (
+	client  devstep.DockerClient
+	project devstep.Project
+)
 
-		configPath := projectRoot + "/devstep.yml"
-
-		if _, err := os.Stat(configPath); err == nil {
-			fmt.Println("A configuration file already exists")
-			os.Exit(1)
-		}
-		configFile := []byte(sampleConfig)
-		err = ioutil.WriteFile(configPath, configFile, 0755)
-		if err != nil {
-			fmt.Printf("Error creating config file '%s'\n%s\n", configPath, err)
-			os.Exit(1)
-		}
-		fmt.Printf("Generated sample configuration file in '%s'\n", configPath)
-	},
+func init() {
+	client = newClient()
+	project = newProject()
 }
 
-var sampleConfig = `# The Docker repository to keep images built by devstep
-# DEFAULT: 'devstep/<CURRENT_DIR_NAME>'
-# repository: 'repo/name'
+func newProject() devstep.Project {
+	config := loadConfig()
+	proj, _ := devstep.NewProject(config)
+	return proj
+}
 
-# The image used by devstep when building environments from scratch
-# DEFAULT: 'fgrehm/devstep:v0.3.0'
-# source_image: 'custom/image:tag'
+func newClient() devstep.DockerClient {
+	dockerHost := os.Getenv("DOCKER_HOST")
+	if dockerHost == "" {
+		dockerHost = "unix:///var/run/docker.sock"
+	}
+	return devstep.NewClient(dockerHost)
+}
 
-# The host cache dir that gets mounted inside the container at '/home/devstep/cache'
-# for speeding up the dependencies installation process.
-# DEFAULT: '/tmp/devstep/cache'
-# cache_dir: '{{env "HOME"}}/devstep/cache'
+func loadConfig() *devstep.ProjectConfig {
+	projectRoot, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 
-# The directory where project sources should be mounted inside the container.
-# DEFAULT: '/workspace'
-# working_dir: '/home/devstep/gocode/src/github.com/fgrehm/devstep-cli'
+	homeDir := os.Getenv("HOME")
+	loader := devstep.NewConfigLoader(client, homeDir, projectRoot)
 
-# Link to other existing containers (like a database for example).
-# Please note that devstep won't start the associated containers automatically
-# and an error will be raised in case the linked container does not exist or
-# if it is not running.
-# DEFAULT: <empty>
-# links:
-# - "postgres:db"
-# - "memcached:mc"
+	config, err := loader.Load()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 
-# Additional Docker volumes to share with the container.
-# DEFAULT: <empty>
-# volumes:
-# - "/path/on/host:/path/on/guest"
+	pluginsToLoad, err := filepath.Glob(homeDir + "/devstep/plugins/*/plugin.js")
+	if err != nil {
+		fmt.Printf("Error searching for plugins under '%s'\n%s\n", homeDir, err.Error())
+		os.Exit(1)
+	}
 
-# Environment variables.
-# DEFAULT: <empty>
-# environment:
-#   RAILS_ENV: "development"
+	if len(pluginsToLoad) > 0 {
+		runtime := devstep.NewPluginRuntime(config)
+		for _, pluginPath := range pluginsToLoad {
+			runtime.Load(pluginPath)
+		}
+		runtime.Trigger("configLoaded")
+	}
 
-# Custom command aliases that can be used with 'devstep run' to save some
-# typing. It is also used for generating project specific binstubs.
-# DEFAULT: <empty>
-# commands:
-#   # This can be run with 'devstep run server'
-#   server:
-# 	cmd: ["rails", "server"]
-# 	# Here you can use some of the configs described above
-# 	publish: ["3000:3000"]
-# 	volumes:
-# 	- '{{env "HOME"}}/certs/some-certificate.crt:/home/devstep/some-certificate.crt'
-# 	- '{{env "HOME"}}/projects/some-gem-sources:/home/devstep/some-gem-sources'
-# 	links:
-# 	- 'redis:redis'
-# 	environment:
-# 	  RAILS_ENV: "hacking"
-#   ruby:
-# 	# No custom options, used only for generating binstubs`
+	if devstep.LogLevel != "" {
+		config.Defaults.Env["DEVSTEP_LOG"] = devstep.LogLevel
+	}
+
+	return config
+}

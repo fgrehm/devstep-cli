@@ -10,8 +10,7 @@ var InfoCmd = cli.Command{
 	Name:  "info",
 	Usage: "show information about the current environment",
 	Action: func(c *cli.Context) {
-		config := loadConfig()
-		printConfig(config)
+		printConfig(project.Config())
 	},
 }
 

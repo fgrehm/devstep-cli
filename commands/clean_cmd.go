@@ -28,7 +28,7 @@ var CleanCmd = cli.Command{
 			}
 		}
 
-		err := newProject().Clean(client)
+		err := project.Clean(client)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

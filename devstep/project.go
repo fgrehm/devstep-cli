@@ -61,51 +61,9 @@ func (p *project) Config() *ProjectConfig {
 func (p *project) Build(client DockerClient, cliOpts *DockerRunOpts) error {
 	fmt.Printf("==> Building project from '%s'\n", p.BaseImage)
 
-	opts := p.Defaults.Merge(cliOpts, &DockerRunOpts{
-		Image:      p.BaseImage,
-		AutoRemove: false,
-		Pty:        true,
-		Cmd:        []string{"/opt/devstep/bin/build-project", p.GuestDir},
-		Workdir:    p.GuestDir,
-		Volumes: []string{
-			p.HostDir + ":" + p.GuestDir,
-			p.CacheDir + ":/home/devstep/cache",
-		},
-	})
-
-	result, err := client.Run(opts)
-	log.Debug("Docker run result: %+v", result)
-
+	result, err := p.buildWithCommand(client, cliOpts, []string{"/opt/devstep/bin/build-project", p.GuestDir})
 	if err != nil {
-		// TODO: Write test for this behavior
-		if result != nil && result.ContainerID != "" {
-			client.RemoveContainer(result.ContainerID)
-		}
 		return err
-	}
-
-	if result.ExitCode != 0 {
-		// TODO: Write test for this behavior
-		client.RemoveContainer(result.ContainerID)
-		return errors.New("Container exited with status != 0, skipping image commit.")
-	}
-
-	if changed, err := client.ContainerChanged(result.ContainerID); err != nil {
-		return err
-
-	} else if changed {
-		if err = p.commit(client, result.ContainerID, "latest"); err != nil {
-			return err
-		}
-
-		tag := time.Now().Local().Format("20060102150405")
-		if err = p.commit(client, result.ContainerID, tag); err != nil {
-			return err
-		}
-
-	} else {
-		// TODO: Write test for this behavior
-		fmt.Println("==> Skipping commit (container did not have any file changed)")
 	}
 
 	fmt.Println("==> Removing container used for build")
@@ -116,51 +74,9 @@ func (p *project) Build(client DockerClient, cliOpts *DockerRunOpts) error {
 func (p *project) Bootstrap(client DockerClient, cliOpts *DockerRunOpts) error {
 	fmt.Printf("==> Creating container based on '%s'\n", p.BaseImage)
 
-	opts := p.Defaults.Merge(cliOpts, &DockerRunOpts{
-		Image:      p.BaseImage,
-		AutoRemove: false,
-		Pty:        true,
-		Cmd:        []string{"bash"},
-		Workdir:    p.GuestDir,
-		Volumes: []string{
-			p.HostDir + ":" + p.GuestDir,
-			p.CacheDir + ":/home/devstep/cache",
-		},
-	})
-
-	result, err := client.Run(opts)
-	log.Debug("Docker run result: %+v", result)
-
+	result, err := p.buildWithCommand(client, cliOpts, []string{"bash"})
 	if err != nil {
-		// TODO: Write test for this behavior
-		if result != nil && result.ContainerID != "" {
-			client.RemoveContainer(result.ContainerID)
-		}
 		return err
-	}
-
-	if result.ExitCode != 0 {
-		// TODO: Write test for this behavior
-		client.RemoveContainer(result.ContainerID)
-		return errors.New("Container exited with status != 0")
-	}
-
-	if changed, err := client.ContainerChanged(result.ContainerID); err != nil {
-		return err
-
-	} else if changed {
-		if err = p.commit(client, result.ContainerID, "latest"); err != nil {
-			return err
-		}
-
-		tag := time.Now().Local().Format("20060102150405")
-		if err = p.commit(client, result.ContainerID, tag); err != nil {
-			return err
-		}
-
-	} else {
-		// TODO: Write test for this behavior
-		fmt.Println("==> Skipping commit (container did not have any file changed)")
 	}
 
 	fmt.Println("==> Removing container used for bootstrapping")
@@ -253,4 +169,55 @@ func (p *project) commit(client DockerClient, containerID, tag string) error {
 	}
 
 	return nil
+}
+
+func (p *project) buildWithCommand(client DockerClient, cliOpts *DockerRunOpts, cmd []string) (*DockerRunResult, error) {
+	opts := p.Defaults.Merge(cliOpts, &DockerRunOpts{
+		Image:      p.BaseImage,
+		AutoRemove: false,
+		Pty:        true,
+		Cmd:        cmd,
+		Workdir:    p.GuestDir,
+		Volumes: []string{
+			p.HostDir + ":" + p.GuestDir,
+			p.CacheDir + ":/home/devstep/cache",
+		},
+	})
+
+	result, err := client.Run(opts)
+	log.Debug("Docker run result: %+v", result)
+
+	if err != nil {
+		// TODO: Write test for this behavior
+		if result != nil && result.ContainerID != "" {
+			client.RemoveContainer(result.ContainerID)
+		}
+		return result, err
+	}
+
+	if result.ExitCode != 0 {
+		// TODO: Write test for this behavior
+		client.RemoveContainer(result.ContainerID)
+		return result, errors.New("Container exited with status != 0, skipping image commit.")
+	}
+
+	if changed, err := client.ContainerChanged(result.ContainerID); err != nil {
+		return result, err
+
+	} else if changed {
+		if err = p.commit(client, result.ContainerID, "latest"); err != nil {
+			return result, err
+		}
+
+		tag := time.Now().Local().Format("20060102150405")
+		if err = p.commit(client, result.ContainerID, tag); err != nil {
+			return result, err
+		}
+
+	} else {
+		// TODO: Write test for this behavior
+		fmt.Println("==> Skipping commit (container did not have any file changed)")
+	}
+
+	return result, nil
 }

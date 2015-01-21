@@ -12,7 +12,6 @@ var BinstubsCmd = cli.Command{
 	Name:  "binstubs",
 	Usage: "Generate binstubs for the commands specified on devstep.yml",
 	Action: func(c *cli.Context) {
-		project := newProject()
 		commands := project.Config().Commands
 
 		if len(commands) == 0 {
