@@ -92,7 +92,7 @@ func (l *configLoader) Load() (*ProjectConfig, error) {
 		return nil, err
 	}
 	if len(tags) > 0 {
-		config.BaseImage = config.RepositoryName + ":" + tags[0]
+		config.BaseImage = config.RepositoryName + ":latest"
 	} else {
 		config.BaseImage = config.SourceImage
 	}

@@ -59,7 +59,7 @@ func Test_BaseImageGetsSetWhenRepositoryTagExists(t *testing.T) {
 
 	ok(t, err)
 	equals(t, "devstep/a-project", repositoryNameSearched)
-	equals(t, "devstep/a-project:a-tag", config.BaseImage)
+	equals(t, "devstep/a-project:latest", config.BaseImage)
 }
 
 func Test_ErrorWhenListTagsFails(t *testing.T) {
