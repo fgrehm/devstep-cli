@@ -23,6 +23,7 @@ var commands = []cli.Command{
 	buildCmd,
 	bootstrapCmd,
 	infoCmd,
+	execCmd,
 	runCmd,
 	binstubsCmd,
 	cleanCmd,
@@ -196,6 +197,19 @@ var hackCmd = cli.Command{
 		project := newProject()
 		runOpts := parseRunOpts(c)
 		err := project.Hack(client, runOpts)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
+var execCmd = cli.Command{
+	Name:  "exec",
+	Usage: "Run a one off command against the last container created for the current project",
+	Action: func(c *cli.Context) {
+		project := newProject()
+		err := project.Exec(client, c.Args())
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

@@ -15,6 +15,7 @@ type Project interface {
 	Clean(DockerClient) error
 	Hack(DockerClient, *DockerRunOpts) error
 	Run(DockerClient, *DockerRunOpts) (*DockerRunResult, error)
+	Exec(DockerClient, []string) error
 }
 
 // Project specific configuration, usually parsed from an yaml file
@@ -201,6 +202,25 @@ func (p *project) Run(client DockerClient, cliRunOpts *DockerRunOpts) (*DockerRu
 	fmt.Printf("==> Creating container using '%s'\n", p.BaseImage)
 
 	return client.Run(opts)
+}
+
+func (p *project) Exec(client DockerClient, cmd []string) error {
+	containers, err := client.ListContainers(p.BaseImage)
+	if err != nil {
+		return err
+	}
+
+	if len(containers) == 0 {
+		return errors.New("No containers found to execute the command.")
+	}
+
+	cmd = append([]string{"/opt/devstep/bin/exec-entrypoint"}, cmd...)
+
+	log.Debug("==> Executing %v on '%s'\n", cmd, containers[0])
+	return client.Execute(&DockerExecOpts{
+		ContainerID: containers[0],
+		Cmd:         cmd,
+	})
 }
 
 func (p *project) Clean(client DockerClient) error {

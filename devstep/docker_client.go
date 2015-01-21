@@ -11,12 +11,14 @@ import (
 )
 
 type DockerClient interface {
+	Execute(*DockerExecOpts) error
 	Run(*DockerRunOpts) (*DockerRunResult, error)
 	RemoveContainer(string) error
 	ContainerChanged(string) (bool, error)
 	Commit(*DockerCommitOpts) error
 	RemoveImage(string) error
 	ListTags(string) ([]string, error)
+	ListContainers(string) ([]string, error)
 }
 
 type DockerRunOpts struct {
@@ -33,6 +35,12 @@ type DockerRunOpts struct {
 	Cmd        []string
 	Publish    []string
 }
+
+type DockerExecOpts struct {
+	ContainerID string
+	Cmd         []string
+}
+
 type DockerRunResult struct {
 	ContainerID string
 	ExitCode    int
@@ -46,6 +54,27 @@ type DockerCommitOpts struct {
 
 type dockerClient struct {
 	client *docker.Client
+}
+
+func (c *dockerClient) Execute(opts *DockerExecOpts) error {
+	log.Info("Creating exec instance")
+	log.Debug("%+v", opts)
+
+	exec, err := c.client.CreateExec(docker.CreateExecOptions{
+		Container:    opts.ContainerID,
+		AttachStdin:  true,
+		AttachStdout: true,
+		AttachStderr: true,
+		Tty:          true,
+		Cmd:          opts.Cmd,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	log.Info("Starting Exec instance with pseudo terminal")
+	return dockerpty.StartExec(c.client, exec)
 }
 
 func (c *dockerClient) Run(opts *DockerRunOpts) (*DockerRunResult, error) {
@@ -166,6 +195,30 @@ func (c *dockerClient) ListTags(repositoryName string) ([]string, error) {
 	log.Debug("Tags found %s", tags)
 
 	return tags, err
+}
+
+// List Containers for a given image
+func (c *dockerClient) ListContainers(image string) ([]string, error) {
+	if image == "" {
+		return nil, errors.New("Image name can't be blank")
+	}
+
+	log.Info("Fetching containers for '%s'", image)
+
+	containers, err := c.client.ListContainers(docker.ListContainersOptions{
+		Filters: map[string][]string{"status": []string{"running"}},
+	})
+	containerIds := []string{}
+	for _, container := range containers {
+		log.Debug("Found '%+v'", container)
+		if container.Image == image {
+			containerIds = append(containerIds, container.ID)
+		}
+	}
+
+	log.Info("Containers found %v", containerIds)
+
+	return containerIds, err
 }
 
 func NewClient(endpoint string) DockerClient {
