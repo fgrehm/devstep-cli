@@ -4,15 +4,14 @@ NEW FEATURES:
 
   - New command: `devstep exec` -> Run `docker exec`s on top of containers that are already running
   - New command: `devstep init` -> Generate an example config file for the current directory
-  - Support `devstep run` options for `devstep bootstrap` / `devstep pristine` / `devstep build`
 
 IMPROVEMENTS:
 
+  - Support `devstep run` options for `devstep bootstrap` / `devstep pristine` / `devstep build`
   - Default source image to `fgrehm/devstep:0.3.0`
   - Experimental support for skipping `docker commit`s in case the container filesystem does not get changed during a build
-  - Update default source image to `fgrehm/devstep:v0.3.0`
   - Add support for bootstraping from `devstep pristine` command with the `--bootstrap` flag
-  - Add support for setting the container name to `devstep hack` and `devstep run` commands (defaults to `project-dir-name:TIMESTAMP`)
+  - Add support for setting the container name to `devstep hack` and `devstep run` commands (defaults to `project-dir-name-TIMESTAMP`)
   - Add support for setting repository name with `--repository` when running `devstep bootstrap`
 
 BUG FIXES:
