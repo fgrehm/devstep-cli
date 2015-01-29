@@ -85,21 +85,12 @@ func (p *project) Bootstrap(client DockerClient, cliOpts *DockerRunOpts) error {
 
 // Starts a hacking session on the project
 func (p *project) Hack(client DockerClient, cliHackOpts *DockerRunOpts) error {
-	opts := p.Defaults.Merge(p.HackOpts, cliHackOpts, &DockerRunOpts{
-		Image:      p.BaseImage,
-		AutoRemove: true,
-		Pty:        true,
-		Cmd:        []string{"/opt/devstep/bin/hack"},
-		Workdir:    p.GuestDir,
-		Volumes: []string{
-			p.HostDir + ":" + p.GuestDir,
-			p.CacheDir + ":/home/devstep/cache",
-		},
+	opts := p.HackOpts.Merge(cliHackOpts, &DockerRunOpts{
+		Cmd: []string{"/opt/devstep/bin/hack"},
 	})
 
-	fmt.Printf("==> Creating container using '%s'\n", p.BaseImage)
+	_, err := p.Run(client, opts)
 
-	_, err := client.Run(opts)
 	return err
 }
 
