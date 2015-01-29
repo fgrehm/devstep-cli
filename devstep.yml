@@ -11,5 +11,3 @@ commands:
     # No custom options
   watchf:
     cmd: ["bash", "-c", "'rm -f .watchf.pid && watchf'"]
-  release:
-    cmd: ["make", "release"]
