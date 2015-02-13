@@ -1,4 +1,4 @@
-## [0.3.0](https://github.com/fgrehm/devstep-cli/compare/v0.1.0...v0.3.0) (2015-02-XX)
+## [0.3.0](https://github.com/fgrehm/devstep-cli/compare/v0.1.0...v0.3.0) (2015-02-12)
 
 NEW FEATURES:
 
