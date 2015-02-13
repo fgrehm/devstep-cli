@@ -2,11 +2,12 @@
 
 set -e
 
-VERSION=$(build/devstep -v | sed 's/devstep version //')
+VERSION=$(build/linux_amd64 -v | sed 's/devstep version //')
 TAG="v${VERSION}"
-echo "Will release ${TAG} in five seconds"
+clear
+echo "Will release devstep-cli ${TAG} in 10 seconds"
 
-sleep 5
+sleep 10
 
 RELEASE_DIR="build/releases/${TAG}"
 mkdir -p $RELEASE_DIR
