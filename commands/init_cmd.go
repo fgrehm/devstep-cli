@@ -85,4 +85,11 @@ var sampleConfig = `# The Docker repository to keep images built by devstep
 # 	environment:
 # 	  RAILS_ENV: "hacking"
 #   ruby:
-# 	# No custom options, used only for generating binstubs`
+# 	# No custom options, used only for generating binstubs
+
+# Custom provisioning steps that can be used when the available buildpacks are not
+# enough. Use it to configure addons or run additional commands during the build.
+# DEFAULT: <empty>
+# provision:
+#   - ['configure-addons', 'redis']
+#   - ['configure-addons', 'heroku-toolbelt']`
