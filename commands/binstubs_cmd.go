@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"bitbucket.org/kardianos/osext"
+	"github.com/kardianos/osext"
 	"fmt"
 	"github.com/codegangsta/cli"
 	"io/ioutil"
