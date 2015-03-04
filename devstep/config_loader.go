@@ -109,7 +109,7 @@ func (l *configLoader) buildDefaultConfig() (*ProjectConfig, error) {
 	suffix := time.Now().Local().Format("20060102150405")
 
 	config := &ProjectConfig{
-		SourceImage:    "fgrehm/devstep:v0.3.0",
+		SourceImage:    "fgrehm/devstep:v0.3.1",
 		RepositoryName: repositoryName,
 		HostDir:        l.projectRoot,
 		GuestDir:       "/workspace",

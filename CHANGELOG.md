@@ -1,3 +1,10 @@
+## [0.3.1](https://github.com/fgrehm/devstep-cli/compare/v0.3.0...v0.3.1) (2015-03-04)
+
+IMPROVEMENTS:
+
+  - Default source image to [fgrehm/devstep:0.3.1](https://github.com/fgrehm/devstep/releases/tag/v0.3.1)
+
+
 ## [0.3.0](https://github.com/fgrehm/devstep-cli/compare/v0.1.0...v0.3.0) (2015-02-12)
 
 NEW FEATURES:

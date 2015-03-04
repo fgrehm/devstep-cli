@@ -37,7 +37,7 @@ var sampleConfig = `# The Docker repository to keep images built by devstep
 # repository: 'repo/name'
 
 # The image used by devstep when building environments from scratch
-# DEFAULT: 'fgrehm/devstep:v0.3.0'
+# DEFAULT: 'fgrehm/devstep:v0.3.1'
 # source_image: 'custom/image:tag'
 
 # The host cache dir that gets mounted inside the container at '/home/devstep/cache'
