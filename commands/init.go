@@ -12,7 +12,8 @@ var (
 	project devstep.Project
 )
 
-func init() {
+// REFACTOR: This belongs to some other package
+func InitDevstepEnv() {
 	client = newClient()
 	project = newProject()
 }

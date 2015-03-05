@@ -21,6 +21,7 @@ var RunCmd = cli.Command{
 		}
 	},
 	Action: func(c *cli.Context) {
+		project := newProject()
 		commands := project.Config().Commands
 
 		runOpts := parseRunOpts(c)
