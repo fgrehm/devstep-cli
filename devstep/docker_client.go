@@ -14,6 +14,7 @@ type DockerClient interface {
 	Run(*DockerRunOpts) (*DockerRunResult, error)
 	RemoveContainer(string) error
 	ContainerChanged(string) (bool, error)
+	ContainerHaveExecInstancesRunning(string) bool
 	Commit(*DockerCommitOpts) error
 	RemoveImage(string) error
 	ListTags(string) ([]string, error)
@@ -79,11 +80,13 @@ func (c *dockerClient) Run(opts *DockerRunOpts) (*DockerRunResult, error) {
 	hostConfig := opts.toHostConfig()
 	log.Debug("HostConfig: %+v", hostConfig)
 
-	if opts.Pty {
+	if opts.Detach {
+		err = c.client.StartContainer(container.ID, hostConfig)
+	} else if opts.Pty {
 		log.Info("Starting container with pseudo terminal")
 		err = dockerpty.Start(c.client, container, hostConfig)
 	} else {
-		return nil, errors.New("Starting containers without Pty was not needed until this moment, please implement :)")
+		return nil, errors.New("Starting daemon containers without Pty was not needed until this moment, please implement :)")
 	}
 
 	if err != nil {
@@ -179,6 +182,25 @@ func (c *dockerClient) ListTags(repositoryName string) ([]string, error) {
 	log.Debug("Tags found %s", tags)
 
 	return tags, err
+}
+
+func (c *dockerClient) ContainerHaveExecInstancesRunning(containerID string) bool {
+	container, err := c.client.InspectContainer(containerID)
+	if err != nil {
+		panic(err)
+	}
+	log.Debug("ExecIDs %+v", container.ExecIDs)
+	for _, execID := range container.ExecIDs {
+		execInspect, err := c.client.InspectExec(execID)
+		if err != nil {
+			panic(err)
+		}
+		log.Debug("execInspect ID=%s RUNNING=%+v", execInspect.ID, execInspect.Running)
+		if execInspect.Running {
+			return true
+		}
+	}
+	return false
 }
 
 // List Containers for a given image

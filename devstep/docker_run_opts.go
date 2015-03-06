@@ -8,6 +8,7 @@ import (
 
 type DockerRunOpts struct {
 	Name       string
+	Detach     bool
 	AutoRemove bool
 	Pty        bool
 	Workdir    string
@@ -48,6 +49,10 @@ func (this DockerRunOpts) Merge(others ...*DockerRunOpts) *DockerRunOpts {
 			this.Privileged = other.Privileged
 		}
 
+		if other.Detach {
+			this.Detach = true
+		}
+
 		this.Publish = append(this.Publish, other.Publish...)
 		this.Volumes = append(this.Volumes, other.Volumes...)
 		this.Links = append(this.Links, other.Links...)
@@ -81,8 +86,8 @@ func (opts *DockerRunOpts) toCreateOpts() docker.CreateContainerOptions {
 			OpenStdin:    opts.Pty,
 			StdinOnce:    opts.Pty,
 			AttachStdin:  opts.Pty,
-			AttachStdout: true,
-			AttachStderr: true,
+			AttachStdout: opts.Pty,
+			AttachStderr: opts.Pty,
 			Tty:          opts.Pty,
 			WorkingDir:   opts.Workdir,
 		},

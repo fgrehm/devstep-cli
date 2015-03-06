@@ -85,13 +85,60 @@ func (p *project) Bootstrap(client DockerClient, cliOpts *DockerRunOpts) error {
 
 // Starts a hacking session on the project
 func (p *project) Hack(client DockerClient, cliHackOpts *DockerRunOpts) error {
-	opts := p.HackOpts.Merge(cliHackOpts, &DockerRunOpts{
-		Cmd: []string{"/opt/devstep/bin/hack"},
-	})
+	if p.SourceImage != p.BaseImage {
+		containerID := ""
 
-	_, err := p.Run(client, opts)
+		containers, err := client.ListContainers(p.BaseImage)
+		if err != nil {
+			return err
+		}
 
-	return err
+		if len(containers) == 0 {
+			log.Debug("==> No containers have been created for '%s', will start a new one\n", p.BaseImage)
+
+			result, err := p.startContainer(client, cliHackOpts)
+			if err != nil {
+				return err
+			}
+
+			containerID = result.ContainerID
+
+			log.Debug("STARTED: %+v", result)
+
+			err = p.Exec(client, []string{"/opt/devstep/bin/hack"})
+		} else {
+			containerID = containers[0]
+			err = p.Exec(client, []string{"bash"})
+		}
+
+		if err != nil {
+			if !client.ContainerHaveExecInstancesRunning(containerID) {
+				fmt.Printf("Removing container: %+v\n", containerID)
+				client.RemoveContainer(containerID)
+			} else {
+				fmt.Printf("Skipping container removal: %s\n", containerID)
+			}
+			return err
+		}
+
+		if !client.ContainerHaveExecInstancesRunning(containerID) {
+			fmt.Printf("Removing container: %+v\n", containerID)
+			client.RemoveContainer(containerID)
+		} else {
+			fmt.Printf("Skipping container removal: %s\n", containerID)
+		}
+
+		return err
+
+	} else {
+		opts := p.HackOpts.Merge(cliHackOpts, &DockerRunOpts{
+			Cmd: []string{"/opt/devstep/bin/hack"},
+		})
+
+		_, err := p.Run(client, opts)
+
+		return err
+	}
 }
 
 func (p *project) Run(client DockerClient, cliRunOpts *DockerRunOpts) (*DockerRunResult, error) {
@@ -160,6 +207,33 @@ func (p *project) commit(client DockerClient, containerID, tag string) error {
 	}
 
 	return nil
+}
+
+func (p *project) startContainer(client DockerClient, cliOpts *DockerRunOpts) (*DockerRunResult, error) {
+	opts := p.Defaults.Merge(cliOpts, &DockerRunOpts{
+		Image:      p.BaseImage,
+		Detach:     true,
+		AutoRemove: false,
+		Pty:        true,
+		Cmd:        []string{"--"},
+		Workdir:    p.GuestDir,
+		Volumes: []string{
+			p.HostDir + ":" + p.GuestDir,
+			p.CacheDir + ":/home/devstep/cache",
+		},
+	})
+
+	result, err := client.Run(opts)
+	log.Debug("Docker run result: %+v", result)
+
+	if err != nil {
+		if result != nil && result.ContainerID != "" {
+			client.RemoveContainer(result.ContainerID)
+		}
+		return result, err
+	}
+
+	return result, nil
 }
 
 func (p *project) buildWithCommand(client DockerClient, cliOpts *DockerRunOpts, cmd []string) (*DockerRunResult, error) {
