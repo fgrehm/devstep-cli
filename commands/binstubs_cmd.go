@@ -1,9 +1,9 @@
 package commands
 
 import (
-	"github.com/kardianos/osext"
 	"fmt"
 	"github.com/codegangsta/cli"
+	"github.com/kardianos/osext"
 	"io/ioutil"
 	"os"
 )

@@ -37,7 +37,7 @@ func parseRunOpts(c *cli.Context) *devstep.DockerRunOpts {
 		Publish: c.StringSlice("publish"),
 		Links:   c.StringSlice("link"),
 		Name:    c.String("name"),
-		Env:     map[string]string{ "DEVSTEP_LOG": c.GlobalString("log-level") },
+		Env:     map[string]string{"DEVSTEP_LOG": c.GlobalString("log-level")},
 	}
 
 	// Only set the privileged config if it was provided
