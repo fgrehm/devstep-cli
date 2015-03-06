@@ -15,6 +15,11 @@ var (
 // REFACTOR: This belongs to some other package
 func InitDevstepEnv() {
 	client = newClient()
+	reloadProject()
+	return nil
+}
+
+func reloadProject() {
 	project = newProject()
 }
 
