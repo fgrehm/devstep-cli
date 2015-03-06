@@ -16,7 +16,6 @@ var (
 func InitDevstepEnv() {
 	client = newClient()
 	reloadProject()
-	return nil
 }
 
 func reloadProject() {
