@@ -23,6 +23,7 @@ type DockerClient interface {
 
 type DockerExecOpts struct {
 	ContainerID string
+	User        string
 	Cmd         []string
 }
 
@@ -47,6 +48,7 @@ func (c *dockerClient) Execute(opts *DockerExecOpts) error {
 
 	exec, err := c.client.CreateExec(docker.CreateExecOptions{
 		Container:    opts.ContainerID,
+		User:         opts.User,
 		AttachStdin:  true,
 		AttachStdout: true,
 		AttachStderr: true,

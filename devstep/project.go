@@ -174,6 +174,7 @@ func (p *project) Exec(client DockerClient, cmd []string) error {
 	return client.Execute(&DockerExecOpts{
 		ContainerID: containers[0],
 		Cmd:         cmd,
+		User:        "developer",
 	})
 }
 
