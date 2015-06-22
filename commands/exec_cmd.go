@@ -21,7 +21,7 @@ var ExecCmd = cli.Command{
 
 		commands := project.Config().Commands
 		if cmd, ok := commands[execCmd[0]]; ok {
-			 execCmd = append(cmd.Cmd, execCmd[1:]...)
+			execCmd = append(cmd.Cmd, execCmd[1:]...)
 		}
 
 		// Prepend a `--` so that it doesn't interfere with the current init
