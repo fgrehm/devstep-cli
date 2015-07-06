@@ -112,7 +112,9 @@ func (p *project) Hack(client DockerClient, cliHackOpts *DockerRunOpts) error {
 		}
 
 		if err != nil {
-			if !client.ContainerHaveExecInstancesRunning(containerID) {
+			// Check how many exec instances we have in place and remove the container
+			// if it is the last one
+			if !client.ContainerHasExecInstancesRunning(containerID) {
 				fmt.Printf("Removing container: %+v\n", containerID)
 				client.RemoveContainer(containerID)
 			} else {
@@ -121,7 +123,9 @@ func (p *project) Hack(client DockerClient, cliHackOpts *DockerRunOpts) error {
 			return err
 		}
 
-		if !client.ContainerHaveExecInstancesRunning(containerID) {
+		// Check how many exec instances we have in place and remove the container
+		// if it is the last one
+		if !client.ContainerHasExecInstancesRunning(containerID) {
 			fmt.Printf("Removing container: %+v\n", containerID)
 			client.RemoveContainer(containerID)
 		} else {

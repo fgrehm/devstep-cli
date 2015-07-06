@@ -5,14 +5,15 @@ import (
 )
 
 type MockClient struct {
-	ExecuteFunc          func(*devstep.DockerExecOpts) error
-	RunFunc              func(*devstep.DockerRunOpts) (*devstep.DockerRunResult, error)
-	RemoveContainerFunc  func(string) error
-	ContainerChangedFunc func(string) (bool, error)
-	CommitFunc           func(*devstep.DockerCommitOpts) error
-	RemoveImageFunc      func(string) error
-	ListTagsFunc         func(string) ([]string, error)
-	ListContainersFunc   func(string) ([]string, error)
+	ExecuteFunc                          func(*devstep.DockerExecOpts) error
+	RunFunc                              func(*devstep.DockerRunOpts) (*devstep.DockerRunResult, error)
+	RemoveContainerFunc                  func(string) error
+	ContainerChangedFunc                 func(string) (bool, error)
+	ContainerHasExecInstancesRunningFunc func(string) bool
+	CommitFunc                           func(*devstep.DockerCommitOpts) error
+	RemoveImageFunc                      func(string) error
+	ListTagsFunc                         func(string) ([]string, error)
+	ListContainersFunc                   func(string) ([]string, error)
 }
 
 func (c *MockClient) Execute(execOpts *devstep.DockerExecOpts) error {
@@ -29,6 +30,10 @@ func (c *MockClient) RemoveContainer(containerID string) error {
 
 func (c *MockClient) ContainerChanged(containerID string) (bool, error) {
 	return c.ContainerChangedFunc(containerID)
+}
+
+func (c *MockClient) ContainerHasExecInstancesRunning(containerID string) bool {
+	return c.ContainerHasExecInstancesRunningFunc(containerID)
 }
 
 func (c *MockClient) Commit(commitOpts *devstep.DockerCommitOpts) error {

@@ -20,7 +20,13 @@ func Test_Hack(t *testing.T) {
 	clientMock := NewMockClient()
 	clientMock.RunFunc = func(o *devstep.DockerRunOpts) (*devstep.DockerRunResult, error) {
 		runOpts = o
-		return nil, nil
+		return &devstep.DockerRunResult{"cid", 0}, nil
+	}
+	clientMock.ListContainersFunc = func(string) ([]string, error) {
+		return []string{}, nil
+	}
+	clientMock.ContainerHasExecInstancesRunningFunc = func(string) bool {
+		return false
 	}
 
 	err = project.Hack(clientMock, &devstep.DockerRunOpts{
@@ -30,9 +36,8 @@ func Test_Hack(t *testing.T) {
 	ok(t, err)
 
 	equals(t, "repo/name:tag", runOpts.Image)
-	assert(t, runOpts.AutoRemove, "AutoRemove is false")
 	assert(t, runOpts.Pty, "Pseudo tty allocation is disabled")
-	equals(t, []string{"/opt/devstep/bin/hack"}, runOpts.Cmd)
+	equals(t, []string{"--"}, runOpts.Cmd)
 	equals(t, "/path/on/guest", runOpts.Workdir)
 
 	assert(t, inArray("/path/on/host:/path/on/guest", runOpts.Volumes), "Project dir was not shared")

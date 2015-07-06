@@ -14,7 +14,7 @@ type DockerClient interface {
 	Run(*DockerRunOpts) (*DockerRunResult, error)
 	RemoveContainer(string) error
 	ContainerChanged(string) (bool, error)
-	ContainerHaveExecInstancesRunning(string) bool
+	ContainerHasExecInstancesRunning(string) bool
 	Commit(*DockerCommitOpts) error
 	RemoveImage(string) error
 	ListTags(string) ([]string, error)
@@ -186,7 +186,7 @@ func (c *dockerClient) ListTags(repositoryName string) ([]string, error) {
 	return tags, err
 }
 
-func (c *dockerClient) ContainerHaveExecInstancesRunning(containerID string) bool {
+func (c *dockerClient) ContainerHasExecInstancesRunning(containerID string) bool {
 	container, err := c.client.InspectContainer(containerID)
 	if err != nil {
 		panic(err)
