@@ -15,7 +15,9 @@ build: $(wildcard **/*.go)
 	@echo "DONE"
 
 build-ci: $(wildcard **/*.go)
-	go build ./...
+	@mkdir -p build
+	go build  -o build/linux_amd64 .
+	@echo 'DONE'
 
 test:
 	go test ./...
