@@ -8,7 +8,6 @@ echo 'Fetching utilities...'
 go get -v github.com/axw/gocov/gocov
 go get -v gopkg.in/matm/v1/gocov-html
 go get -v github.com/parkghost/watchf
-go get -v code.google.com/p/go.tools/cmd/vet
 
 if ! $(which gox &> /dev/null); then
   echo 'Building cross compile toolchain'
@@ -24,5 +23,3 @@ if ! [ -L $HOME/bin/devstep ]; then
   echo 'Symlinking CLI'
   ln -s `pwd`/build/linux_amd64 $HOME/bin/devstep
 fi
-
-configure-addons docker
