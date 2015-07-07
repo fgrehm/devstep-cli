@@ -31,3 +31,7 @@ coverage:
 
 release: deps test vet build
 	@./bin/release
+
+watchf:
+	go get github.com/parkghost/watchf/...
+	watchf
