@@ -10,6 +10,7 @@ import (
 )
 
 var dockerRunFlags = []cli.Flag{
+	cli.StringFlag{Name: "v, volume", Usage: "Bind mount a volume"},
 	cli.StringFlag{Name: "w, working_dir", Usage: "Working directory inside the container"},
 	cli.StringSliceFlag{Name: "p, publish", Value: &cli.StringSlice{}, Usage: "Publish a container's port to the host (hostPort:containerPort)"},
 	cli.StringSliceFlag{Name: "link", Value: &cli.StringSlice{}, Usage: "Add link to another container (name:alias)"},
