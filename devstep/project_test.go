@@ -20,7 +20,7 @@ func Test_Hack(t *testing.T) {
 	clientMock := NewMockClient()
 	clientMock.RunFunc = func(o *devstep.DockerRunOpts) (*devstep.DockerRunResult, error) {
 		runOpts = o
-		return &devstep.DockerRunResult{"cid", 0}, nil
+		return &devstep.DockerRunResult{ContainerID: "cid", ExitCode: 0}, nil
 	}
 	clientMock.ListContainersFunc = func(string) ([]string, error) {
 		return []string{}, nil

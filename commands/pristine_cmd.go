@@ -28,7 +28,6 @@ var PristineCmd = cli.Command{
 		}
 	},
 	Action: func(c *cli.Context) {
-		// TODO: Figure out if this is the right way to invoke other CLI actions
 		CleanCmd.Action(c)
 		reloadProject()
 		if c.Bool("bootstrap") {

@@ -12,7 +12,6 @@ var (
 	project devstep.Project
 )
 
-// REFACTOR: This belongs to some other package
 func InitDevstepEnv() {
 	client = newClient()
 	reloadProject()
