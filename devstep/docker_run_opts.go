@@ -56,6 +56,9 @@ func (this DockerRunOpts) Merge(others ...*DockerRunOpts) *DockerRunOpts {
 		this.Publish = append(this.Publish, other.Publish...)
 		this.Volumes = append(this.Volumes, other.Volumes...)
 		this.Links = append(this.Links, other.Links...)
+		if this.Env == nil {
+			this.Env = map[string]string{}
+		}
 		for k, v := range other.Env {
 			this.Env[k] = v
 		}
