@@ -1,9 +1,16 @@
+## [0.4.1](https://github.com/fgrehm/devstep-cli/compare/v0.4.0...v0.4.1) (2015-08-03)
+
+NEW FEATURES:
+  - Support for using relative volume paths on on `devstep.yml` [[GH-8]]
+
+[GH-8]: https://github.com/fgrehm/devstep-cli/issues/8
+
 ## [0.4.0](https://github.com/fgrehm/devstep-cli/compare/v0.3.1...v0.4.0) (2015-07-06)
 
 NEW FEATURES:
   - New `devstep hack` behavior [[GH-35]]
 
-[GH-35](https://github.com/fgrehm/devstep-cli/issues/35)
+[GH-35]: https://github.com/fgrehm/devstep-cli/issues/35
 
 ## [0.3.1](https://github.com/fgrehm/devstep-cli/compare/v0.3.0...v0.3.1) (2015-03-04)
 
