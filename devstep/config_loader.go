@@ -6,6 +6,7 @@ import (
 	"gopkg.in/yaml.v1"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 	"time"
 )
@@ -182,7 +183,17 @@ func assignYamlValues(yamlConf *yamlConfig, config *ProjectConfig) {
 		config.Defaults.Links = append(config.Defaults.Links, yamlConf.Links...)
 	}
 	if yamlConf.Volumes != nil {
-		config.Defaults.Volumes = append(config.Defaults.Volumes, yamlConf.Volumes...)
+		volumes := yamlConf.Volumes
+		for i, vol := range volumes {
+			hostAndGuestDirs := strings.SplitN(vol, ":", 2)
+			hostDir, err := filepath.Abs(hostAndGuestDirs[0])
+			if err != nil {
+				panic(err)
+			}
+			guestDir := hostAndGuestDirs[1]
+			volumes[i] = hostDir + ":" + guestDir
+		}
+		config.Defaults.Volumes = append(config.Defaults.Volumes, volumes...)
 	}
 	if yamlConf.Env != nil {
 		for k, v := range yamlConf.Env {
