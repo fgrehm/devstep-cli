@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/codegangsta/cli"
 	"github.com/fgrehm/devstep-cli/commands"
 	"github.com/fgrehm/devstep-cli/devstep"
@@ -21,17 +23,27 @@ func main() {
 		commands.InitDevstepEnv()
 		return devstep.SetLogLevel(c.GlobalString("log-level"))
 	}
-	app.Commands = []cli.Command{
-		commands.HackCmd,
-		commands.BuildCmd,
-		commands.BootstrapCmd,
-		commands.InfoCmd,
-		commands.ExecCmd,
-		commands.RunCmd,
-		commands.BinstubsCmd,
-		commands.CleanCmd,
-		commands.PristineCmd,
-		commands.InitCmd,
+
+	containerName := os.Getenv("DEVSTEP_CONTAINER_NAME")
+	if containerName == "" {
+		app.Commands = []cli.Command{
+			commands.BinstubsCmd,
+			commands.BootstrapCmd,
+			commands.BuildCmd,
+			commands.CleanCmd,
+			commands.ExecCmd,
+			commands.HackCmd,
+			commands.InfoCmd,
+			commands.InitCmd,
+			commands.PristineCmd,
+			commands.RunCmd,
+		}
+	} else { // inside container
+		app.Commands = []cli.Command{
+			commands.CommitCmd,
+			commands.InfoCmd,
+			commands.InitCmd,
+		}
 	}
 
 	app.RunAndExitOnError()

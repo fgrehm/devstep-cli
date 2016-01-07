@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"time"
+
+	"github.com/kardianos/osext"
 )
 
 // The project interface provides access to the configuration, state and
@@ -11,6 +13,7 @@ import (
 type Project interface {
 	Config() *ProjectConfig
 	Build(DockerClient, *DockerRunOpts) error
+	Commit(DockerClient, string) error
 	Bootstrap(DockerClient, *DockerRunOpts) error
 	Clean(DockerClient) error
 	Hack(DockerClient, *DockerRunOpts) error
@@ -68,6 +71,22 @@ func (p *project) Build(client DockerClient, cliOpts *DockerRunOpts) error {
 
 	fmt.Println("==> Removing container used for build")
 	return client.RemoveContainer(result.ContainerID)
+}
+
+// Commit a container that is running
+func (p *project) Commit(client DockerClient, containerName string) error {
+	containerID, err := client.LookupContainerID(containerName)
+
+	if err != nil {
+		return err
+	}
+
+	if err = p.commit(client, containerID, "latest"); err != nil {
+		return err
+	}
+
+	tag := time.Now().Local().Format("20060102150405")
+	return p.commit(client, containerID, tag)
 }
 
 // Start a hacking session and commit it to an image if all goes well
@@ -215,6 +234,11 @@ func (p *project) commit(client DockerClient, containerID, tag string) error {
 }
 
 func (p *project) startContainer(client DockerClient, cliOpts *DockerRunOpts) (*DockerRunResult, error) {
+	executable, err := osext.Executable()
+	if err != nil {
+		return nil, err
+	}
+
 	opts := p.Defaults.Merge(cliOpts, &DockerRunOpts{
 		Image:      p.BaseImage,
 		Detach:     true,
@@ -225,6 +249,8 @@ func (p *project) startContainer(client DockerClient, cliOpts *DockerRunOpts) (*
 		Volumes: []string{
 			p.HostDir + ":" + p.GuestDir,
 			p.CacheDir + ":/home/devstep/cache",
+			executable + ":/home/devstep/bin/devstep",
+			"/var/run/docker.sock:/var/run/docker.sock",
 		},
 	})
 

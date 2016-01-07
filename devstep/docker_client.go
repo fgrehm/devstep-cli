@@ -19,6 +19,7 @@ type DockerClient interface {
 	RemoveImage(string) error
 	ListTags(string) ([]string, error)
 	ListContainers(string) ([]string, error)
+	LookupContainerID(string) (string, error)
 }
 
 type DockerExecOpts struct {
@@ -227,6 +228,14 @@ func (c *dockerClient) ListContainers(image string) ([]string, error) {
 	log.Info("Containers found %v", containerIds)
 
 	return containerIds, err
+}
+
+func (c *dockerClient) LookupContainerID(containerName string) (string, error) {
+	container, err := c.client.InspectContainer(containerName)
+	if err != nil {
+		return "", errors.New("Error inspecting container:\n  " + err.Error())
+	}
+	return container.Name, nil
 }
 
 func NewClient(endpoint string) DockerClient {

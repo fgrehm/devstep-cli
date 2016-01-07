@@ -117,7 +117,7 @@ func (l *configLoader) buildDefaultConfig() (*ProjectConfig, error) {
 		CacheDir:       "/tmp/devstep/cache",
 		Defaults: &DockerRunOpts{
 			Name:     projectDirName + "-" + suffix,
-			Env:      make(map[string]string),
+			Env:      map[string]string{"DEVSTEP_CONTAINER_NAME": (projectDirName + "-" + suffix)},
 			Hostname: projectDirName,
 		},
 		HackOpts: &DockerRunOpts{Env: make(map[string]string)},
