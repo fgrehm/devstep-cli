@@ -19,11 +19,6 @@ var ExecCmd = cli.Command{
 			os.Exit(1)
 		}
 
-		commands := project.Config().Commands
-		if cmd, ok := commands[execCmd[0]]; ok {
-			execCmd = append(cmd.Cmd, execCmd[1:]...)
-		}
-
 		// Prepend a `--` so that it doesn't interfere with the current init
 		// process args
 		execCmd = append([]string{"--"}, execCmd...)

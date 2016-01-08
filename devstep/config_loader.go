@@ -31,17 +31,6 @@ type yamlConfig struct {
 	Volumes        []string                `yaml:"volumes"`
 	Env            map[string]string       `yaml:"environment"`
 	Hack           *yamlConfig             `yaml:"hack"`
-	Commands       map[string]*yamlCommand `yaml:"commands"`
-}
-
-type yamlCommand struct {
-	Name       *string           `yaml:"name"`
-	Cmd        []string          `yaml:"cmd"`
-	Privileged *bool             `yaml:"privileged"`
-	Links      []string          `yaml:"links"`
-	Volumes    []string          `yaml:"volumes"`
-	Publish    []string          `yaml:"publish"`
-	Env        map[string]string `yaml:"environment"`
 }
 
 func NewConfigLoader(client DockerClient, homeDirectory, projectRoot string) ConfigLoader {
@@ -117,11 +106,13 @@ func (l *configLoader) buildDefaultConfig() (*ProjectConfig, error) {
 		CacheDir:       "/tmp/devstep/cache",
 		Defaults: &DockerRunOpts{
 			Name:     projectDirName + "-" + suffix,
-			Env:      map[string]string{"DEVSTEP_CONTAINER_NAME": (projectDirName + "-" + suffix)},
+			Env:      make(map[string]string),
 			Hostname: projectDirName,
 		},
-		HackOpts: &DockerRunOpts{Env: make(map[string]string)},
-		Commands: make(map[string]*ProjectCommand),
+		HackOpts: &DockerRunOpts{
+			// Refactor: This should live somewhere else
+			Env: map[string]string{"DEVSTEP_CONTAINER_NAME": (projectDirName + "-" + suffix)},
+		},
 	}
 
 	return config, nil
@@ -212,36 +203,6 @@ func assignYamlValues(yamlConf *yamlConfig, config *ProjectConfig) {
 			for k, v := range yamlConf.Hack.Env {
 				config.HackOpts.Env[k] = v
 			}
-		}
-	}
-
-	if yamlConf.Commands != nil && len(yamlConf.Commands) > 0 {
-		for cmdName, yamlCmd := range yamlConf.Commands {
-			if yamlCmd == nil {
-				yamlCmd = &yamlCommand{}
-			}
-
-			cmd := &ProjectCommand{
-				cmdName,
-				DockerRunOpts{
-					Links:   yamlCmd.Links,
-					Volumes: yamlCmd.Volumes,
-					Env:     yamlCmd.Env,
-					Publish: yamlCmd.Publish,
-				},
-			}
-
-			if yamlCmd.Privileged != nil {
-				cmd.Privileged = yamlCmd.Privileged
-			}
-
-			if len(yamlCmd.Cmd) > 0 {
-				cmd.Cmd = yamlCmd.Cmd
-			} else {
-				cmd.Cmd = []string{cmdName}
-			}
-
-			config.Commands[cmdName] = cmd
 		}
 	}
 }

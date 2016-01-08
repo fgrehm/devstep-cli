@@ -31,12 +31,6 @@ type ProjectConfig struct {
 	CacheDir       string                     // a directory on the host machine were we can place downloaded packages
 	Defaults       *DockerRunOpts             // default options passed on to docker for all commands
 	HackOpts       *DockerRunOpts             // `devstep hack` specific options passed to the container
-	Commands       map[string]*ProjectCommand // shortcut for commands
-}
-
-type ProjectCommand struct {
-	Name string
-	DockerRunOpts
 }
 
 // An implementation of a Project.

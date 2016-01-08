@@ -32,15 +32,6 @@ func printConfig(config *devstep.ProjectConfig) {
 		fmt.Println("\n==> Hack options:")
 		printDockerRunOpts(config.HackOpts, "")
 	}
-	if config.Commands != nil {
-		fmt.Println("\n==> Commands:")
-		for _, cmd := range config.Commands {
-			fmt.Printf("* %s\n", cmd.Name)
-			fmt.Printf("  Cmd:        %v\n", cmd.Cmd)
-			fmt.Printf("  Publish:    %v\n", cmd.Publish)
-			printDockerRunOpts(&cmd.DockerRunOpts, "  ")
-		}
-	}
 }
 
 func printDockerRunOpts(opts *devstep.DockerRunOpts, prefix string) {

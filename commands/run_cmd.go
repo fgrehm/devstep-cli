@@ -22,7 +22,6 @@ var RunCmd = cli.Command{
 	},
 	Action: func(c *cli.Context) {
 		project := newProject()
-		commands := project.Config().Commands
 
 		runOpts := parseRunOpts(c)
 		runOpts.Cmd = c.Args()
@@ -32,11 +31,6 @@ var RunCmd = cli.Command{
 			fmt.Printf("No command provided to `devstep run`\n\n")
 			cli.ShowCommandHelp(c, "run")
 			os.Exit(1)
-		}
-
-		if cmd, ok := commands[runOpts.Cmd[0]]; ok {
-			runOpts = cmd.Merge(runOpts)
-			runOpts.Cmd = append(cmd.Cmd, runOpts.Cmd[1:]...)
 		}
 
 		// Prepend a `--` so that it doesn't interfere with the current init
