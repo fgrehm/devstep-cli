@@ -11,7 +11,7 @@ deps:
 build: $(wildcard **/*.go)
 	@echo "Building CLI..."
 	@mkdir -p build
-	gox -verbose -osarch="darwin/amd64 linux/amd64" -output="build/{{.OS}}_{{.Arch}}"
+	go build -o build/linux_amd64
 	@echo "DONE"
 
 build-ci: $(wildcard **/*.go)
