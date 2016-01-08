@@ -29,9 +29,6 @@ coverage:
 	@mkdir -p build
 	gocov test github.com/fgrehm/devstep-cli/devstep | gocov-html > build/coverage.html
 
-release: deps test vet build
-	@./bin/release
-
 watchf:
 	go get github.com/parkghost/watchf/...
 	watchf
