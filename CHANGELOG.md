@@ -1,3 +1,19 @@
+## [1.0.0](https://github.com/fgrehm/devstep-cli/compare/v0.4.1...v1.0.0) (unreleased)
+
+NEW FEATURES:
+  - Experimental `devstep commit` command [[GH-39]]
+
+[GH-39]: https://github.com/fgrehm/devstep-cli/issues/39
+
+IMPROVEMENTS:
+
+  - Default source image to [fgrehm/devstep:1.0.0](https://github.com/fgrehm/devstep/releases/tag/v1.0.0)
+
+BREAKING CHANGES:
+
+  - Removed support for the `commands` config.
+  - Removed support for the `binstubs` command.
+
 ## [0.4.1](https://github.com/fgrehm/devstep-cli/compare/v0.4.0...v0.4.1) (2015-08-03)
 
 NEW FEATURES:
