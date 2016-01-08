@@ -1,4 +1,4 @@
-## [1.0.0](https://github.com/fgrehm/devstep-cli/compare/v0.4.1...v1.0.0) (unreleased)
+## [1.0.0](https://github.com/fgrehm/devstep-cli/compare/v0.4.1...v1.0.0) (2016-01-08)
 
 NEW FEATURES:
   - Experimental `devstep commit` command [[GH-39]]
