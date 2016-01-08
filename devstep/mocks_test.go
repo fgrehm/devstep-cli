@@ -14,6 +14,7 @@ type MockClient struct {
 	RemoveImageFunc                      func(string) error
 	ListTagsFunc                         func(string) ([]string, error)
 	ListContainersFunc                   func(string) ([]string, error)
+	LookupContainerIDFunc                func(string) (string, error)
 }
 
 func (c *MockClient) Execute(execOpts *devstep.DockerExecOpts) error {
@@ -50,6 +51,10 @@ func (c *MockClient) ListTags(repositoryName string) ([]string, error) {
 
 func (c *MockClient) ListContainers(repositoryName string) ([]string, error) {
 	return c.ListContainersFunc(repositoryName)
+}
+
+func (c *MockClient) LookupContainerID(containerName string) (string, error) {
+	return c.LookupContainerIDFunc(containerName)
 }
 
 func NewMockClient() *MockClient {
