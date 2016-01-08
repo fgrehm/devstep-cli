@@ -16,8 +16,8 @@ func Test_Defaults(t *testing.T) {
 
 	ok(t, err)
 
-	equals(t, "fgrehm/devstep:v0.4.0", config.SourceImage)
-	equals(t, "fgrehm/devstep:v0.4.0", config.BaseImage)
+	equals(t, "fgrehm/devstep:v1.0.0", config.SourceImage)
+	equals(t, "fgrehm/devstep:v1.0.0", config.BaseImage)
 	equals(t, projectRoot, config.HostDir)
 	equals(t, "/workspace", config.GuestDir)
 	equals(t, "/tmp/devstep/cache", config.CacheDir)
@@ -37,8 +37,8 @@ func Test_DefaultsWithBlankValuesOnYaml(t *testing.T) {
 
 	ok(t, err)
 
-	equals(t, "fgrehm/devstep:v0.4.0", config.SourceImage)
-	equals(t, "fgrehm/devstep:v0.4.0", config.BaseImage)
+	equals(t, "fgrehm/devstep:v1.0.0", config.SourceImage)
+	equals(t, "fgrehm/devstep:v1.0.0", config.BaseImage)
 	equals(t, projectRoot, config.HostDir)
 	equals(t, "/workspace", config.GuestDir)
 	equals(t, "/tmp/devstep/cache", config.CacheDir)
