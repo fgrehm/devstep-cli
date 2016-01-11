@@ -23,14 +23,14 @@ type Project interface {
 
 // Project specific configuration, usually parsed from an yaml file
 type ProjectConfig struct {
-	SourceImage    string                     // image used when starting environments from scratch
-	BaseImage      string                     // starting point for the project
-	RepositoryName string                     // name of the docker repository this project should be commited
-	HostDir        string                     // root directory of the project on the host machine
-	GuestDir       string                     // directory where the project sources will be mounted on the container
-	CacheDir       string                     // a directory on the host machine were we can place downloaded packages
-	Defaults       *DockerRunOpts             // default options passed on to docker for all commands
-	HackOpts       *DockerRunOpts             // `devstep hack` specific options passed to the container
+	SourceImage    string         // image used when starting environments from scratch
+	BaseImage      string         // starting point for the project
+	RepositoryName string         // name of the docker repository this project should be commited
+	HostDir        string         // root directory of the project on the host machine
+	GuestDir       string         // directory where the project sources will be mounted on the container
+	CacheDir       string         // a directory on the host machine were we can place downloaded packages
+	Defaults       *DockerRunOpts // default options passed on to docker for all commands
+	HackOpts       *DockerRunOpts // `devstep hack` specific options passed to the container
 }
 
 // An implementation of a Project.

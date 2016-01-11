@@ -22,15 +22,15 @@ type configLoader struct {
 }
 
 type yamlConfig struct {
-	RepositoryName *string                 `yaml:"repository"`
-	SourceImage    *string                 `yaml:"source_image"`
-	CacheDir       *string                 `yaml:"cache_dir"`
-	GuestDir       *string                 `yaml:"working_dir"`
-	Privileged     *bool                   `yaml:"privileged"`
-	Links          []string                `yaml:"links"`
-	Volumes        []string                `yaml:"volumes"`
-	Env            map[string]string       `yaml:"environment"`
-	Hack           *yamlConfig             `yaml:"hack"`
+	RepositoryName *string           `yaml:"repository"`
+	SourceImage    *string           `yaml:"source_image"`
+	CacheDir       *string           `yaml:"cache_dir"`
+	GuestDir       *string           `yaml:"working_dir"`
+	Privileged     *bool             `yaml:"privileged"`
+	Links          []string          `yaml:"links"`
+	Volumes        []string          `yaml:"volumes"`
+	Env            map[string]string `yaml:"environment"`
+	Hack           *yamlConfig       `yaml:"hack"`
 }
 
 func NewConfigLoader(client DockerClient, homeDirectory, projectRoot string) ConfigLoader {
