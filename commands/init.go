@@ -13,7 +13,7 @@ var (
 )
 
 func InitDevstepEnv() {
-	client = newClient()
+	client = devstep.NewClient()
 	reloadProject()
 }
 
@@ -25,14 +25,6 @@ func newProject() devstep.Project {
 	config := loadConfig()
 	proj, _ := devstep.NewProject(config)
 	return proj
-}
-
-func newClient() devstep.DockerClient {
-	dockerHost := os.Getenv("DOCKER_HOST")
-	if dockerHost == "" {
-		dockerHost = "unix:///var/run/docker.sock"
-	}
-	return devstep.NewClient(dockerHost)
 }
 
 func loadConfig() *devstep.ProjectConfig {

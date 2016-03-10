@@ -238,8 +238,8 @@ func (c *dockerClient) LookupContainerID(containerName string) (string, error) {
 	return container.Name, nil
 }
 
-func NewClient(endpoint string) DockerClient {
+func NewClient() DockerClient {
 	// TODO: Error handling
-	innerClient, _ := docker.NewClient(endpoint)
+	innerClient, _ := docker.NewClientFromEnv()
 	return &dockerClient{innerClient}
 }
