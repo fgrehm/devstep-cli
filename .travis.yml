@@ -1,12 +1,14 @@
 language: go
 go:
-- 1.5.2
+- 1.6
 script: make ci
 deploy:
   provider: releases
   api_key:
     secure: P2tDRvWUzbdyW29lsWRhjk+XZuTwJQey9qP/3crK99G3hvSH73toFjFwi7gRIOl1S/Ag+r3NckB0qtnx/3BoWPu5e0t5Vc4Ojf5X9/+i4YK/8j+cH+TG5fAQ7EkEXIi8/V+1YM8m9TOcjtIm1jtpPTHpKxfhmKLh5NqE9engT08=
-  file: build/linux_amd64
+  file:
+  - 'build/linux_amd64'
+  - 'build/darwin_amd64'
   skip_cleanup: true
   on:
     tags: true

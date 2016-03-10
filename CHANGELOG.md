@@ -1,8 +1,11 @@
-## [1.0.0](https://github.com/fgrehm/devstep-cli/compare/v0.4.1...v1.0.0) (2016-01-08)
+## [1.0.0](https://github.com/fgrehm/devstep-cli/compare/v0.4.1...v1.0.0) (2016-03-09)
 
 NEW FEATURES:
+
+  - Experimental support for OSX using [dinghy](https://github.com/codekitchen/dinghy) [[GH-26]]
   - Experimental `devstep commit` command [[GH-39]]
 
+[GH-26]: https://github.com/fgrehm/devstep-cli/issues/26
 [GH-39]: https://github.com/fgrehm/devstep-cli/issues/39
 
 IMPROVEMENTS:
