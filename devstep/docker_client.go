@@ -80,14 +80,11 @@ func (c *dockerClient) Run(opts *DockerRunOpts) (*DockerRunResult, error) {
 		defer c.RemoveContainer(container.ID)
 	}
 
-	hostConfig := opts.toHostConfig()
-	log.Debug("HostConfig: %+v", hostConfig)
-
 	if opts.Detach {
-		err = c.client.StartContainer(container.ID, hostConfig)
+		err = c.client.StartContainer(container.ID, &docker.HostConfig{})
 	} else if opts.Pty {
 		log.Info("Starting container with pseudo terminal")
-		err = dockerpty.Start(c.client, container, hostConfig)
+		err = dockerpty.Start(c.client, container, &docker.HostConfig{})
 	} else {
 		return nil, errors.New("Starting daemon containers without Pty was not needed until this moment, please implement :)")
 	}

@@ -2,15 +2,16 @@ package commands
 
 import (
 	"fmt"
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 	"github.com/fgrehm/devstep-cli/devstep"
 )
 
 var InfoCmd = cli.Command{
 	Name:  "info",
 	Usage: "show information about the current environment",
-	Action: func(c *cli.Context) {
+	Action: func(c *cli.Context) error {
 		printConfig(project.Config())
+        return nil
 	},
 }
 

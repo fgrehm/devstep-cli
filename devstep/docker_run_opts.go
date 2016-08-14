@@ -78,6 +78,9 @@ func (opts *DockerRunOpts) toCreateOpts() docker.CreateContainerOptions {
 		exposedPorts[docker.Port(containerPort)] = struct{}{}
 	}
 
+    hostConfig := opts.toHostConfig()
+    log.Debug("HostConfig: %+v", hostConfig)
+
 	return docker.CreateContainerOptions{
 		Name: opts.Name,
 		Config: &docker.Config{
@@ -94,6 +97,7 @@ func (opts *DockerRunOpts) toCreateOpts() docker.CreateContainerOptions {
 			Tty:          opts.Pty,
 			WorkingDir:   opts.Workdir,
 		},
+        HostConfig: hostConfig,
 	}
 }
 

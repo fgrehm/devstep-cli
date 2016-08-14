@@ -2,14 +2,14 @@ package commands
 
 import (
 	"fmt"
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 	"io/ioutil"
 	"os"
 )
 
 var InitCmd = cli.Command{
 	Name: "init",
-	Action: func(c *cli.Context) {
+	Action: func(c *cli.Context) error {
 		projectRoot, err := os.Getwd()
 		if err != nil {
 			fmt.Println(err)
@@ -29,6 +29,7 @@ var InitCmd = cli.Command{
 			os.Exit(1)
 		}
 		fmt.Printf("Generated sample configuration file in '%s'\n", configPath)
+        return nil
 	},
 }
 
