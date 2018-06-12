@@ -2,7 +2,7 @@ package commands
 
 import (
 	"fmt"
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 	"github.com/segmentio/go-prompt"
 	"os"
 )
@@ -20,7 +20,7 @@ var CleanCmd = cli.Command{
 			fmt.Println("--force")
 		}
 	},
-	Action: func(c *cli.Context) {
+	Action: func(c *cli.Context) error {
 		if !c.Bool("force") {
 			if ok := prompt.Confirm("Are you sure? [y/n]"); !ok {
 				fmt.Println("Aborting")
@@ -33,5 +33,6 @@ var CleanCmd = cli.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
+        return nil
 	},
 }

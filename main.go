@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 	"github.com/fgrehm/devstep-cli/commands"
 	"github.com/fgrehm/devstep-cli/devstep"
 )
@@ -45,5 +45,5 @@ func main() {
 		}
 	}
 
-	app.RunAndExitOnError()
+	app.Run(os.Args)
 }

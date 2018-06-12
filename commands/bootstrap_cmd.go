@@ -2,7 +2,7 @@ package commands
 
 import (
 	"fmt"
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 	"os"
 )
 
@@ -23,7 +23,7 @@ var BootstrapCmd = cli.Command{
 			fmt.Println("--repository")
 		}
 	},
-	Action: func(c *cli.Context) {
+	Action: func(c *cli.Context) error {
 		if repo := c.String("repository"); repo != "" {
 			project.Config().RepositoryName = repo
 		}
@@ -34,5 +34,6 @@ var BootstrapCmd = cli.Command{
 			fmt.Println(err)
 			os.Exit(1)
 		}
+        return nil
 	},
 }

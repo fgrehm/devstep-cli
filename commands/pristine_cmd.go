@@ -2,7 +2,7 @@ package commands
 
 import (
 	"fmt"
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 )
 
 var PristineCmd = cli.Command{
@@ -27,13 +27,14 @@ var PristineCmd = cli.Command{
 			fmt.Println("--repository")
 		}
 	},
-	Action: func(c *cli.Context) {
-		CleanCmd.Action(c)
+	Action: func(c *cli.Context) error {
+		CleanCmd.Run(c)
 		reloadProject()
 		if c.Bool("bootstrap") {
-			BootstrapCmd.Action(c)
+			BootstrapCmd.Run(c)
 		} else {
-			BuildCmd.Action(c)
+			BuildCmd.Run(c)
 		}
+        return nil
 	},
 }

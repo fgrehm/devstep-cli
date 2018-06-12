@@ -2,7 +2,7 @@ package commands
 
 import (
 	"fmt"
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 	"os"
 )
 
@@ -20,12 +20,13 @@ var HackCmd = cli.Command{
 			fmt.Println("--name")
 		}
 	},
-	Action: func(c *cli.Context) {
+	Action: func(c *cli.Context) error {
 		runOpts := parseRunOpts(c)
 		err := project.Hack(client, runOpts)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
+        return nil
 	},
 }

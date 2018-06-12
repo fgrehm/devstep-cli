@@ -2,7 +2,7 @@ package commands
 
 import (
 	"fmt"
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 	"os"
 )
 
@@ -20,7 +20,7 @@ var RunCmd = cli.Command{
 			fmt.Println("--name")
 		}
 	},
-	Action: func(c *cli.Context) {
+	Action: func(c *cli.Context) error {
 		project := newProject()
 
 		runOpts := parseRunOpts(c)
@@ -44,5 +44,6 @@ var RunCmd = cli.Command{
 		}
 
 		os.Exit(result.ExitCode)
+        return nil
 	},
 }
